@@ -1,5 +1,5 @@
 {
-  "description": "Framework N2 with mbed",
+  "description": "Framework N2 mbed for stm32",
   "name": "framework-N2",
   "url": "http://mbed.org",
   "version": "1.0.0"
