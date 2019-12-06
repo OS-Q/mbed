@@ -46,7 +46,9 @@ retval
 dequeue
 assertation
 destructor
+destructors
 constructor
+constructors
 ctor
 dtor
 dereference
@@ -71,6 +73,7 @@ deasserted
 getter
 setter
 preallocated
+excludable
 ascii
 IPv
 param
@@ -96,4 +99,15 @@ TCPSocket
 UDPSocket
 Socket
 unregister
+deinit
+auth
+pppapi
+pbuf
+nak
+reqs
+xmit
+pppd
+pppdebug
+ppp
+api
 _doxy_

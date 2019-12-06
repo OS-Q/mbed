@@ -47,7 +47,6 @@
 #include "6LoWPAN/Thread/thread_leader_service.h"
 #include "6LoWPAN/Thread/thread_tmfcop_lib.h"
 #include "6LoWPAN/Thread/thread_host_bootstrap.h"
-#include "6LoWPAN/Thread/thread_extension.h"
 #include "6LoWPAN/Thread/thread_router_bootstrap.h"
 #include "6LoWPAN/Thread/thread_network_synch.h"
 #include "6LoWPAN/Thread/thread_neighbor_class.h"
@@ -515,7 +514,7 @@ static void thread_parse_annoucement(protocol_interface_info_entry_t *cur, mle_m
     channel_page = ptr[0];
     channel = common_read_16_bit(&ptr[1]);
 
-    if (linkConfiguration->timestamp == timestamp) {
+    if (linkConfiguration && linkConfiguration->timestamp == timestamp) {
         // We received same timestamp
         tr_debug("Same timestamp");
         return;
@@ -528,7 +527,7 @@ static void thread_parse_annoucement(protocol_interface_info_entry_t *cur, mle_m
     }
 
 
-    if (linkConfiguration->timestamp > timestamp) {
+    if (linkConfiguration && linkConfiguration->timestamp > timestamp) {
         // We received older time stamp we just announce back to originator channel
         thread_bootstrap_announce_send(cur, linkConfiguration->channel_page, linkConfiguration->rfChannel, linkConfiguration->panId, linkConfiguration->timestamp, channel);
         return;
@@ -744,7 +743,7 @@ static bool thread_address_registration_tlv_check(protocol_interface_info_entry_
             }
         }
     }
-    thread_extension_child_address_registration_response_process(cur);
+    thread_bootstrap_child_address_registration_response_process(cur);
 
     return ret_val;
 }

@@ -1,13 +1,5 @@
-
-/** \addtogroup platform */
-/** @{*/
-/**
- * \defgroup platform_toolchain Toolchain functions
- * @{
- */
-
 /* mbed Microcontroller Library
- * Copyright (c) 2006-2013 ARM Limited
+ * Copyright (c) 2006-2019 ARM Limited
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +17,7 @@
 #ifndef MBED_TOOLCHAIN_H
 #define MBED_TOOLCHAIN_H
 
-#include "mbed_preprocessor.h"
+#include "platform/mbed_preprocessor.h"
 
 
 // Warning for unsupported compilers
@@ -36,6 +28,13 @@
 #warning "This compiler is not yet supported."
 #endif
 
+/** \addtogroup platform-public-api */
+/** @{*/
+
+/**
+ * \defgroup platform_toolchain Toolchain functions
+ * @{
+ */
 
 // Attributes
 
@@ -72,7 +71,11 @@
  *  @endcode
  */
 #ifndef MBED_ALIGN
-#if defined(__ICCARM__)
+#if __cplusplus >= 201103 && !defined __CC_ARM
+#define MBED_ALIGN(N) alignas(N)
+#elif __STDC_VERSION__ >= 201112 && !defined __CC_ARM
+#define MBED_ALIGN(N) _Alignas(N)
+#elif defined(__ICCARM__)
 #define MBED_ALIGN(N) _Pragma(MBED_STRINGIFY(data_alignment=N))
 #else
 #define MBED_ALIGN(N) __attribute__((aligned(N)))
@@ -298,7 +301,11 @@
  *  @endcode
  */
 #ifndef MBED_NORETURN
-#if defined(__GNUC__) || defined(__clang__) || defined(__CC_ARM)
+#if __cplusplus >= 201103
+#define MBED_NORETURN [[noreturn]]
+#elif __STDC_VERSION__ >= 201112
+#define MBED_NORETURN _Noreturn
+#elif defined(__GNUC__) || defined(__clang__) || defined(__CC_ARM)
 #define MBED_NORETURN __attribute__((noreturn))
 #elif defined(__ICCARM__)
 #define MBED_NORETURN __noreturn

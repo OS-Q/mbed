@@ -165,6 +165,12 @@ bool CellularStateMachine::open_sim()
     bool sim_ready = state == CellularDevice::SimStateReady;
 
     if (sim_ready) {
+#ifdef MBED_CONF_CELLULAR_CLEAR_ON_CONNECT
+        if (_cellularDevice.clear() != NSAPI_ERROR_OK) {
+            tr_warning("CellularDevice clear failed");
+            return false;
+        }
+#endif
         _cb_data.error = _network.set_registration(_plmn);
         tr_debug("STM: set_registration: %d, plmn: %s", _cb_data.error, _plmn ? _plmn : "NULL");
         if (_cb_data.error) {
@@ -365,9 +371,6 @@ void CellularStateMachine::state_device_ready()
                 _status = 0;
                 enter_to_state(STATE_SIM_PIN);
             }
-        } else {
-            _status = 0;
-            enter_to_state(STATE_INIT);
         }
     }
     if (_cb_data.error != NSAPI_ERROR_OK) {
@@ -395,7 +398,6 @@ void CellularStateMachine::state_sim_pin()
             retry_state_or_fail();
             return;
         }
-
         if (_network.is_active_context()) { // check if context was already activated
             tr_debug("Active context found.");
             _status |= ACTIVE_PDP_CONTEXT;

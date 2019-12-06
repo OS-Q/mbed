@@ -127,6 +127,18 @@
         "use-mpu": {
             "help": "Use the MPU if available to fault execution from RAM and writes to ROM. Can be disabled to reduce image size.",
             "value": true
+        },
+        "minimal-printf-enable-64-bit": {
+            "help": "Enable printing 64 bit integers when using mprintf profile",
+            "value": true
+        },
+        "minimal-printf-enable-floating-point": {
+            "help": "Enable floating point printing when using mprintf profile",
+            "value": false
+        },
+        "minimal-printf-set-floating-point-max-decimals": {
+            "help": "Maximum number of decimals to be printed",
+            "value": 6
         }
     },
     "target_overrides": {
@@ -206,6 +218,10 @@
             "fatal-error-auto-reboot-enabled": true
         },
         "DISCO_F407VG": {
+            "crash-capture-enabled": true,
+            "fatal-error-auto-reboot-enabled": true
+        },
+        "DISCO_F413ZH": {
             "crash-capture-enabled": true,
             "fatal-error-auto-reboot-enabled": true
         }

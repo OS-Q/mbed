@@ -19,6 +19,7 @@
 
 #include "AT_CellularStack.h"
 #include "CellularUtil.h"
+#include "mbed_wait_api.h"
 #include "drivers/Timer.h"
 
 

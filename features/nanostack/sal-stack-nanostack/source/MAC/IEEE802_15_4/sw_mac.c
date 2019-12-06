@@ -25,6 +25,7 @@
 #include "MAC/IEEE802_15_4/mac_defines.h"
 #include "MAC/IEEE802_15_4/mac_mcps_sap.h"
 #include "MAC/IEEE802_15_4/mac_pd_sap.h"
+#include "MAC/IEEE802_15_4/mac_security_mib.h"
 #include "MAC/rf_driver_storage.h"
 #include "MAC/virtual_rf/virtual_rf_defines.h"
 #include "mac_fhss_callbacks.h"
@@ -121,6 +122,14 @@ mac_api_t *ns_sw_mac_create(int8_t rf_driver_id, mac_description_storage_size_t 
 
     mac_store.virtual_driver = NULL;
     return this;
+}
+
+int8_t ns_sw_mac_enable_frame_counter_per_key(struct mac_api_s *mac_api_s, bool enable_feature)
+{
+    if (!mac_api_s || mac_api_s != mac_store.mac_api) {
+        return -1;
+    }
+    return mac_sec_mib_frame_counter_per_key_set(mac_store.setup, enable_feature);
 }
 
 int8_t ns_sw_mac_virtual_client_register(mac_api_t *api, int8_t virtual_driver_id)
@@ -698,6 +707,19 @@ void sw_mac_stats_update(protocol_interface_rf_mac_setup_s *setup, mac_stats_typ
                 break;
         }
     }
+}
+
+int ns_sw_mac_phy_statistics_start(struct mac_api_s *mac_api, phy_rf_statistics_s *phy_statistics)
+{
+    if (!mac_api || !phy_statistics) {
+        return -1;
+    }
+    protocol_interface_rf_mac_setup_s *mac_setup = get_sw_mac_ptr_by_mac_api(mac_api);
+    if (!mac_setup) {
+        return -1;
+    }
+    mac_setup->dev_driver->phy_driver->phy_rf_statistics = phy_statistics;
+    return 0;
 }
 
 uint32_t ns_sw_mac_read_current_timestamp(struct mac_api_s *mac_api)

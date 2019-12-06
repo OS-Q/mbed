@@ -1,5 +1,5 @@
 /* mbed Microcontroller Library
- * Copyright (c) 2006-2012 ARM Limited
+ * Copyright (c) 2006-2019 ARM Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,18 +23,21 @@
 #define THREAD_H
 
 #include <stdint.h>
-#include "cmsis_os2.h"
-#include "mbed_rtos1_types.h"
-#include "mbed_rtos_storage.h"
+#include "rtos/mbed_rtos_types.h"
+#include "rtos/mbed_rtos1_types.h"
+#include "rtos/mbed_rtos_storage.h"
 #include "platform/Callback.h"
 #include "platform/mbed_toolchain.h"
 #include "platform/NonCopyable.h"
 #include "rtos/Semaphore.h"
 #include "rtos/Mutex.h"
 
+#if MBED_CONF_RTOS_PRESENT || defined(DOXYGEN_ONLY) || defined(UNITTEST)
+
 namespace rtos {
-/** \addtogroup rtos */
+/** \addtogroup rtos-public-api */
 /** @{*/
+
 /**
  * \defgroup rtos_Thread Thread class
  * @{
@@ -87,8 +90,8 @@ public:
     /** Allocate a new thread without starting execution
       @param   priority       initial priority of the thread function. (default: osPriorityNormal).
       @param   stack_size     stack size (in bytes) requirements for the thread function. (default: OS_STACK_SIZE).
-      @param   stack_mem      pointer to the stack area to be used by this thread (default: NULL).
-      @param   name           name to be used for this thread. It has to stay allocated for the lifetime of the thread (default: NULL)
+      @param   stack_mem      pointer to the stack area to be used by this thread (default: nullptr).
+      @param   name           name to be used for this thread. It has to stay allocated for the lifetime of the thread (default: nullptr)
 
       @note Default value of tz_module will be MBED_TZ_DEFAULT_ACCESS
       @note You cannot call this function from ISR context.
@@ -96,7 +99,7 @@ public:
 
     Thread(osPriority priority = osPriorityNormal,
            uint32_t stack_size = OS_STACK_SIZE,
-           unsigned char *stack_mem = NULL, const char *name = NULL)
+           unsigned char *stack_mem = nullptr, const char *name = nullptr)
     {
         constructor(priority, stack_size, stack_mem, name);
     }
@@ -108,15 +111,15 @@ public:
                               threads not using secure calls at all. See "TrustZone RTOS Context Management" for more details.
       @param   priority       initial priority of the thread function. (default: osPriorityNormal).
       @param   stack_size     stack size (in bytes) requirements for the thread function. (default: OS_STACK_SIZE).
-      @param   stack_mem      pointer to the stack area to be used by this thread (default: NULL).
-      @param   name           name to be used for this thread. It has to stay allocated for the lifetime of the thread (default: NULL)
+      @param   stack_mem      pointer to the stack area to be used by this thread (default: nullptr).
+      @param   name           name to be used for this thread. It has to stay allocated for the lifetime of the thread (default: nullptr)
 
       @note You cannot call this function from ISR context.
     */
 
     Thread(uint32_t tz_module, osPriority priority = osPriorityNormal,
            uint32_t stack_size = OS_STACK_SIZE,
-           unsigned char *stack_mem = NULL, const char *name = NULL)
+           unsigned char *stack_mem = nullptr, const char *name = nullptr)
     {
         constructor(tz_module, priority, stack_size, stack_mem, name);
     }
@@ -126,7 +129,7 @@ public:
       @param   task           function to be executed by this thread.
       @param   priority       initial priority of the thread function. (default: osPriorityNormal).
       @param   stack_size     stack size (in bytes) requirements for the thread function. (default: OS_STACK_SIZE).
-      @param   stack_mem      pointer to the stack area to be used by this thread (default: NULL).
+      @param   stack_mem      pointer to the stack area to be used by this thread (default: nullptr).
       @deprecated
         Thread-spawning constructors hide errors. Replaced by thread.start(task).
 
@@ -147,17 +150,17 @@ public:
     Thread(mbed::Callback<void()> task,
            osPriority priority = osPriorityNormal,
            uint32_t stack_size = OS_STACK_SIZE,
-           unsigned char *stack_mem = NULL)
+           unsigned char *stack_mem = nullptr)
     {
         constructor(task, priority, stack_size, stack_mem);
     }
 
     /** Create a new thread, and start it executing the specified function.
-      @param   argument       pointer that is passed to the thread function as start argument. (default: NULL).
+      @param   argument       pointer that is passed to the thread function as start argument. (default: nullptr).
       @param   task           argument to task.
       @param   priority       initial priority of the thread function. (default: osPriorityNormal).
       @param   stack_size     stack size (in bytes) requirements for the thread function. (default: OS_STACK_SIZE).
-      @param   stack_mem      pointer to the stack area to be used by this thread (default: NULL).
+      @param   stack_mem      pointer to the stack area to be used by this thread (default: nullptr).
       @deprecated
         Thread-spawning constructors hide errors. Replaced by thread.start(callback(task, argument)).
 
@@ -179,18 +182,18 @@ public:
     Thread(T *argument, void (T::*task)(),
            osPriority priority = osPriorityNormal,
            uint32_t stack_size = OS_STACK_SIZE,
-           unsigned char *stack_mem = NULL)
+           unsigned char *stack_mem = nullptr)
     {
         constructor(mbed::callback(task, argument),
                     priority, stack_size, stack_mem);
     }
 
     /** Create a new thread, and start it executing the specified function.
-      @param   argument       pointer that is passed to the thread function as start argument. (default: NULL).
+      @param   argument       pointer that is passed to the thread function as start argument. (default: nullptr).
       @param   task           argument to task.
       @param   priority       initial priority of the thread function. (default: osPriorityNormal).
       @param   stack_size     stack size (in bytes) requirements for the thread function. (default: OS_STACK_SIZE).
-      @param   stack_mem      pointer to the stack area to be used by this thread (default: NULL).
+      @param   stack_mem      pointer to the stack area to be used by this thread (default: nullptr).
       @deprecated
         Thread-spawning constructors hide errors. Replaced by thread.start(callback(task, argument)).
 
@@ -212,7 +215,7 @@ public:
     Thread(T *argument, void (*task)(T *),
            osPriority priority = osPriorityNormal,
            uint32_t stack_size = OS_STACK_SIZE,
-           unsigned char *stack_mem = NULL)
+           unsigned char *stack_mem = nullptr)
     {
         constructor(mbed::callback(task, argument),
                     priority, stack_size, stack_mem);
@@ -221,10 +224,10 @@ public:
     /** Create a new thread, and start it executing the specified function.
         Provided for backwards compatibility
       @param   task           function to be executed by this thread.
-      @param   argument       pointer that is passed to the thread function as start argument. (default: NULL).
+      @param   argument       pointer that is passed to the thread function as start argument. (default: nullptr).
       @param   priority       initial priority of the thread function. (default: osPriorityNormal).
       @param   stack_size     stack size (in bytes) requirements for the thread function. (default: OS_STACK_SIZE).
-      @param   stack_mem      pointer to the stack area to be used by this thread (default: NULL).
+      @param   stack_mem      pointer to the stack area to be used by this thread (default: nullptr).
       @deprecated
         Thread-spawning constructors hide errors. Replaced by thread.start(callback(task, argument)).
 
@@ -242,10 +245,10 @@ public:
     MBED_DEPRECATED_SINCE("mbed-os-5.1",
                           "Thread-spawning constructors hide errors. "
                           "Replaced by thread.start(callback(task, argument)).")
-    Thread(void (*task)(void const *argument), void *argument = NULL,
+    Thread(void (*task)(void const *argument), void *argument = nullptr,
            osPriority priority = osPriorityNormal,
            uint32_t stack_size = OS_STACK_SIZE,
-           unsigned char *stack_mem = NULL)
+           unsigned char *stack_mem = nullptr)
     {
         constructor(mbed::callback((void (*)(void *))task, argument),
                     priority, stack_size, stack_mem);
@@ -387,7 +390,7 @@ public:
     uint32_t max_stack() const;
 
     /** Get thread name
-      @return  thread name or NULL if the name was not set.
+      @return  thread name or nullptr if the name was not set.
 
       @note You may call this function from ISR context.
      */
@@ -473,7 +476,7 @@ public:
     static osStatus yield();
 
     /** Get the thread id of the current running thread.
-      @return  thread ID for reference by other functions or NULL in case of error.
+      @return  thread ID for reference by other functions or nullptr in case of error.
 
       @note You may call this function from ISR context.
       @deprecated Static methods only affecting current thread cause confusion. Replaced by ThisThread::get_id.
@@ -517,18 +520,18 @@ private:
     // delegated constructors
     void constructor(osPriority priority = osPriorityNormal,
                      uint32_t stack_size = OS_STACK_SIZE,
-                     unsigned char *stack_mem = NULL,
-                     const char *name = NULL);
+                     unsigned char *stack_mem = nullptr,
+                     const char *name = nullptr);
     void constructor(mbed::Callback<void()> task,
                      osPriority priority = osPriorityNormal,
                      uint32_t stack_size = OS_STACK_SIZE,
-                     unsigned char *stack_mem = NULL,
-                     const char *name = NULL);
+                     unsigned char *stack_mem = nullptr,
+                     const char *name = nullptr);
     void constructor(uint32_t tz_module,
                      osPriority priority = osPriorityNormal,
                      uint32_t stack_size = OS_STACK_SIZE,
-                     unsigned char *stack_mem = NULL,
-                     const char *name = NULL);
+                     unsigned char *stack_mem = nullptr,
+                     const char *name = nullptr);
     static void _thunk(void *thread_ptr);
 
     mbed::Callback<void()>     _task;
@@ -545,4 +548,4 @@ private:
 }
 #endif
 
-
+#endif

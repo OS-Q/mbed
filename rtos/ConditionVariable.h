@@ -1,5 +1,5 @@
 /* Mbed Microcontroller Library
- * Copyright (c) 2017-2018 ARM Limited
+ * Copyright (c) 2017-2019 ARM Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,17 +23,23 @@
 #define CONDITIONVARIABLE_H
 
 #include <stdint.h>
-#include "cmsis_os.h"
+#include "rtos/mbed_rtos_types.h"
 #include "rtos/Mutex.h"
 #include "rtos/Semaphore.h"
 
 #include "platform/NonCopyable.h"
 
+#if MBED_CONF_RTOS_PRESENT || defined(DOXYGEN_ONLY)
+
 namespace rtos {
-/** \addtogroup rtos */
+/** \addtogroup rtos-public-api */
 /** @{*/
 
 struct Waiter;
+/**
+ * \defgroup rtos_ConditionVariable ConditionVariable class
+ * @{
+ */
 
 /** The ConditionVariable class is a synchronization primitive that allows
  *   threads to wait until a particular condition occurs.
@@ -325,7 +331,9 @@ protected:
 #endif // !defined(DOXYGEN_ONLY)
 };
 
-}
+/** @}*/
+/** @}*/
+} // namespace rtos
 #endif
 
-/** @}*/
+#endif

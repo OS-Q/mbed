@@ -1,12 +1,5 @@
-/** \addtogroup platform */
-/** @{*/
-/**
- * \defgroup platform_mpu_mgmt MPU management functions
- * @{
- */
-
 /* mbed Microcontroller Library
- * Copyright (c) 2006-2018 ARM Limited
+ * Copyright (c) 2006-2019 ARM Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +16,19 @@
 #ifndef MBED_MPU_MGMT_H
 #define MBED_MPU_MGMT_H
 
-#include "mbed_toolchain.h"
 #include "hal/mpu_api.h"
-#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/** \addtogroup platform-public-api */
+/** @{*/
+
+/**
+ * \defgroup platform_mpu_mgmt MPU management functions
+ * @{
+ */
 
 #if (DEVICE_MPU && MBED_CONF_PLATFORM_USE_MPU) || defined(DOXYGEN_ONLY)
 

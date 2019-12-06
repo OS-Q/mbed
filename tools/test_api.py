@@ -2272,11 +2272,21 @@ def build_tests(tests, base_source_paths, build_path, target, toolchain_name,
 
 def test_spec_from_test_builds(test_builds):
     for build in test_builds:
-        if Target.get_target(test_builds[build]['platform']).is_PSA_non_secure_target:
+        # Convert TZ target name to test spec platform name
+        #
+        # 1. All TZ targets should have name pattern: PLATFORM_[NPSA_]S/NS, where:
+        #    (1) 'PLATFORM' for test spec platform name
+        #    (2) 'NPSA' for non-PSA targets. Defaults to PSA target if absent.
+        #    (3) 'S'/'NS' for secure/non-secure targets
+        # 2. Secure target may participate in Greentea, so its name is also truncated here.
+        if Target.get_target(test_builds[build]['platform']).is_TrustZone_target:
             if test_builds[build]['platform'].endswith('_NS'):
                 test_builds[build]['platform'] = test_builds[build]['platform'][:-3]
-            if test_builds[build]['platform'].endswith('_PSA'):
-                test_builds[build]['platform'] = test_builds[build]['platform'][:-4]
+            elif test_builds[build]['platform'].endswith('_S'):
+                test_builds[build]['platform'] = test_builds[build]['platform'][:-2]
+
+            if test_builds[build]['platform'].endswith('_NPSA'):
+                test_builds[build]['platform'] = test_builds[build]['platform'][:-5]
     return {
         "builds": test_builds
     }

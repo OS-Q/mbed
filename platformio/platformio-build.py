@@ -1,18 +1,3 @@
-# Copyright 2019-present PlatformIO <contact@platformio.org>
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
-
 import sys
 import warnings
 from shutil import copyfile
@@ -119,7 +104,7 @@ def get_mbed_target(board_type):
         join(FRAMEWORK_DIR, "platformio", "variants_remap.json"))
     variant = variants_remap[
         board_type] if board_type in variants_remap else board_type.upper()
-    return variant
+    return env.BoardConfig().get("build.mbed_variant", variant)
 
 
 def get_build_profile(cpp_defines):
@@ -259,7 +244,12 @@ if ldscript:
 #
 
 src_filter = "-<*>"
+usb_dir = join("drivers", "source", "usb")
 for f in configuration.get("src_files"):
+    # Exclude USB related source files from mbed2 build as they contain
+    # references to RTOS API which is also not included.
+    if not MBED_RTOS and usb_dir in f:
+        continue
     src_filter = src_filter + " +<%s>" % f
 
 env.BuildSources(

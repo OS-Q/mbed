@@ -20,6 +20,7 @@
 
 #include "eventOS_event.h"
 #include "mlme.h"
+#include "mac_data_buffer.h"
 #include "ns_list.h"
 
 struct cca_structure_s;
@@ -147,24 +148,19 @@ typedef struct mac_mcps_data_conf_fail_s {
 
 typedef struct protocol_interface_rf_mac_setup {
     int8_t mac_interface_id;
-    bool macUpState;
+    bool macUpState: 1;
     bool shortAdressValid: 1;   //Define Dynamic src address to mac16 when it is true
     bool beaconSrcAddressModeLong: 1; //This force beacon src to mac64 otherwise shortAdressValid will define type
+    bool secFrameCounterPerKey: 1;
     bool mac_extension_enabled: 1;
     bool mac_ack_tx_active: 1;
     bool mac_frame_pending: 1;
-    uint16_t mac_short_address;
-    uint16_t pan_id;
-    uint8_t mac64[8];
-    uint16_t coord_short_address;
-    uint8_t coord_long_address[8];
     /* MAC Capability Information */
     bool macCapRxOnIdle: 1;
     bool macCapCordinator: 1;
     bool macCapAssocationPermit: 1;
     bool macCapBatteryPowered: 1;
     bool macCapSecrutityCapability: 1;
-
     bool macProminousMode: 1;
     bool macGTSPermit: 1;
     bool mac_security_enabled: 1;
@@ -172,7 +168,6 @@ typedef struct protocol_interface_rf_mac_setup {
     bool mac_security_bypass_unknow_device: 1;
     /* Load balancing need this feature */
     bool macAcceptAnyBeacon: 1;
-
     /* TX process Flag */
     bool macTxProcessActive: 1;
     bool macTxRequestAck: 1;
@@ -186,6 +181,13 @@ typedef struct protocol_interface_rf_mac_setup {
     bool macBroadcastDisabled: 1;
     bool scan_active: 1;
     bool rf_csma_extension_supported: 1;
+    bool ack_tx_possible: 1;
+    uint16_t mac_short_address;
+    uint16_t pan_id;
+    uint8_t mac64[8];
+    uint16_t coord_short_address;
+    uint8_t coord_long_address[8];
+
     /* CSMA Params */
     unsigned macMinBE: 4;
     unsigned macMaxBE: 4;
@@ -197,7 +199,6 @@ typedef struct protocol_interface_rf_mac_setup {
     channel_list_s mac_channel_list;
     uint8_t scan_duration; //Needed???
     mac_scan_type_t scan_type;
-
 
     uint8_t mac_channel;
     //uint8_t cca_failure;
@@ -224,6 +225,8 @@ typedef struct protocol_interface_rf_mac_setup {
     uint16_t multi_cca_interval;        /**< Length of the additional CSMA-CA period(s) in microseconds */
     /* Indirect queue parameters */
     struct mac_pre_build_frame *indirect_pd_data_request_queue;
+    struct mac_pre_build_frame enhanced_ack_buffer;
+    uint32_t enhanced_ack_handler_timestamp;
     arm_event_t mac_mcps_timer_event;
     uint16_t indirect_pending_bytes;
     arm_nwk_mlme_event_type_e mac_mlme_event;
@@ -249,6 +252,7 @@ typedef struct protocol_interface_rf_mac_setup {
     struct mlme_device_descriptor_s *device_description_table;
     uint8_t device_description_table_size;
     struct mlme_key_descriptor_s *key_description_table;
+    void *key_device_frame_counter_list_buffer;
     uint8_t key_description_table_size;
     uint8_t key_lookup_list_size;
     uint8_t key_usage_list_size;

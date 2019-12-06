@@ -20,6 +20,7 @@ while read file; do
     # matched.
     start_tokens=(  "/@code"
                     "/addtogroup"
+                    "ingroup"
                     "defgroup"
                     "<"
                     "()"
@@ -28,12 +29,14 @@ while read file; do
     formats=(   'strip_between'
                 'strip_between'
                 'strip_line'
+                'strip_line'
                 'strip_between_sameline'
                 'strip_token'
             )
 
     end_tokens=(    "/@endcode"
                     "/\*"
+                    ""
                     ""
                     ">"
                     ""
@@ -118,6 +121,6 @@ echo "Total Errors Found: ${ERRORS}"
 
 if [ ${ERRORS} -ne 0 ]; then
     echo "If any of the failed words should be considered valid please add them to the ignore.en.pws file"\
-         "found in tools/test/scripts/doxy-spellchecker between the _code_ and _doxy_ tags."
+         "found in tools/test/travis-ci/doxy-spellchecker between the _code_ and _doxy_ tags."
     exit 1
 fi

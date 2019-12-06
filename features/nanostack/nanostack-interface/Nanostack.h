@@ -37,12 +37,20 @@ public:
     class LoWPANNDInterface;
     class ThreadInterface;
     class WisunInterface;
+    class PPPInterface;
 
     /* Implement OnboardNetworkStack method */
     virtual nsapi_error_t add_ethernet_interface(EMAC &emac, bool default_if, OnboardNetworkStack::Interface **interface_out);
 
     /* Local variant with stronger typing and manual address specification */
     nsapi_error_t add_ethernet_interface(EMAC &emac, bool default_if, Nanostack::EthernetInterface **interface_out, const uint8_t *mac_addr = NULL);
+
+    virtual nsapi_error_t add_ppp_interface(PPP &ppp, bool default_if, OnboardNetworkStack::Interface **interface_out);
+
+    /* Local variant with stronger typing and manual address specification */
+    nsapi_error_t add_ppp_interface(PPP &ppp, bool default_if, Nanostack::PPPInterface **interface_out);
+
+    nsapi_error_t remove_ppp_interface(OnboardNetworkStack::Interface **interface_out);
 
 protected:
 
@@ -275,7 +283,7 @@ private:
      *  @param func     Callback to be called
      *  @return         0 on success, negative error code on failure
      */
-    nsapi_error_t call_in(int delay, mbed::Callback<void()> func);
+    virtual nsapi_error_t call_in(int delay, mbed::Callback<void()> func);
 
     struct nanostack_callback {
         mbed::Callback<void()> callback;

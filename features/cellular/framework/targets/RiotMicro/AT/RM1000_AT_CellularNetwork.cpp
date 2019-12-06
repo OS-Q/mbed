@@ -19,6 +19,7 @@
 #include "rtos.h"
 #include "CellularCommon.h"
 #include "RM1000_AT_CellularNetwork.h"
+#include "platform/mbed_wait_api.h"
 
 #include "mbed-trace/mbed_trace.h"
 #ifndef TRACE_GROUP

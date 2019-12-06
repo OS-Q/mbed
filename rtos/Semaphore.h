@@ -1,5 +1,5 @@
 /* mbed Microcontroller Library
- * Copyright (c) 2006-2012 ARM Limited
+ * Copyright (c) 2006-2019 ARM Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,15 +23,16 @@
 #define SEMAPHORE_H
 
 #include <stdint.h>
-#include "cmsis_os2.h"
-#include "mbed_rtos1_types.h"
-#include "mbed_rtos_storage.h"
+#include "rtos/mbed_rtos_types.h"
+#include "rtos/mbed_rtos1_types.h"
+#include "rtos/mbed_rtos_storage.h"
 #include "platform/mbed_toolchain.h"
 #include "platform/NonCopyable.h"
 
 namespace rtos {
-/** \addtogroup rtos */
+/** \addtogroup rtos-public-api */
 /** @{*/
+
 /**
  * \defgroup rtos_Semaphore Semaphore class
  * @{
@@ -141,14 +142,18 @@ public:
 private:
     void constructor(int32_t count, uint16_t max_count);
 
+#if MBED_CONF_RTOS_PRESENT
     int32_t _wait(uint32_t millisec);
 
     osSemaphoreId_t               _id;
     mbed_rtos_storage_semaphore_t _obj_mem;
+#else
+    static bool semaphore_available(void *);
+    int32_t _count;
+    uint16_t _max_count;
+#endif
 };
 /** @}*/
 /** @}*/
 }
 #endif
-
-

@@ -33,6 +33,7 @@ struct mac_api_s;
 struct mac_description_storage_size_s;
 struct fhss_api;
 struct mac_statistics_s;
+struct phy_rf_statistics_s;
 
 /**
  * @brief Creates 802.15.4 MAC API instance which will use RF driver given
@@ -82,11 +83,27 @@ extern struct fhss_api *ns_sw_mac_get_fhss_api(struct mac_api_s *mac_api);
 extern int ns_sw_mac_statistics_start(struct mac_api_s *mac_api, struct mac_statistics_s *mac_statistics);
 
 /**
+ * @brief Start collecting statistics from PHY driver.
+ * @param mac_api MAC instance.
+ * @param phy_statistics Statistics storage.
+ * @return 0 on success, -1 on fail.
+ */
+extern int ns_sw_mac_phy_statistics_start(struct mac_api_s *mac_api, struct phy_rf_statistics_s *phy_statistics);
+
+/**
  * @brief Read current timestamp.
  * @param mac_api MAC instance.
  * @return Current timestamp in us
  */
 extern uint32_t ns_sw_mac_read_current_timestamp(struct mac_api_s *mac_api);
+
+/**
+ * @brief Enable or disable Frame counter per security key. SW MAC must be create before enable this feature!
+ * @param mac_api MAC instance.
+ * @param enable_feature True will allocate frame counter table for devices / key False will clear mode and free counter table.
+ * @return 0 on success, -1 on fail.
+ */
+extern int8_t ns_sw_mac_enable_frame_counter_per_key(struct mac_api_s *mac_api, bool enable_feature);
 
 #ifdef __cplusplus
 }

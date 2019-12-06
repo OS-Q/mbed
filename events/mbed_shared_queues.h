@@ -1,8 +1,5 @@
-
-/** \addtogroup events */
-/** @{*/
-/* events
- * Copyright (c) 2017 ARM Limited
+/*
+ * Copyright (c) 2016-2019 ARM Limited
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +19,8 @@
 #include "events/EventQueue.h"
 
 namespace mbed {
+/** \addtogroup events-public-api */
+/** @{*/
 
 /**
  * Return a pointer to an EventQueue, on which normal tasks can be queued.
@@ -85,8 +84,8 @@ events::EventQueue *mbed_highprio_event_queue();
 
 #endif // MBED_CONF_RTOS_PRESENT
 
-};
+/** @}*/
+
+}
 
 #endif
-
-/** @}*/

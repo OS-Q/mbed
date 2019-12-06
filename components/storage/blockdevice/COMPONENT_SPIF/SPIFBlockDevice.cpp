@@ -15,10 +15,11 @@
  */
 
 #include "SPIFBlockDevice.h"
+#include "rtos/ThisThread.h"
 #include "mbed_critical.h"
 
 #include <string.h>
-#include "mbed_wait_api.h"
+#include <inttypes.h>
 
 #include "mbed_trace.h"
 #include "mbed_debug.h"
@@ -936,7 +937,10 @@ int SPIFBlockDevice::_reset_flash_mem()
                 tr_error("Sending RST failed");
                 status = -1;
             }
-            _is_mem_ready();
+            if (false == _is_mem_ready()) {
+                tr_error("Device not ready, write failed");
+                status = -1;
+            }
         }
     }
 
@@ -951,7 +955,7 @@ bool SPIFBlockDevice::_is_mem_ready()
     bool mem_ready = true;
 
     do {
-        wait_ms(1);
+        rtos::ThisThread::sleep_for(1);
         retries++;
         //Read the Status Register from device
         if (SPIF_BD_ERROR_OK != _spi_send_general_command(SPIF_RDSR, SPI_NO_ADDRESS_COMMAND, NULL, 0, status_value,

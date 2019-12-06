@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+#ifdef MBED_CONF_NANOSTACK_CONFIGURATION
+
 #include "ns_types.h"
 #include "fhss_api.h"
 #include "fhss_config.h"
@@ -43,11 +45,17 @@ static const fhss_api_t *fhss_active_handle = NULL;
 static EventQueue *equeue;
 #endif
 
+// All members of fhss_timeout_s must be initialized to make the structure
+// constant-initialized, and hence able to be omitted by the linker,
+// as SingletonPtr now relies on C++ constant-initialization. (Previously it
+// worked through C++ zero-initialization). And all the constants should be zero
+// to ensure it stays in the actual zero-init part of the image if used, avoiding
+// an initialized-data cost.
 struct fhss_timeout_s {
-    void (*fhss_timer_callback)(const fhss_api_t *fhss_api, uint16_t);
-    uint32_t start_time;
-    uint32_t stop_time;
-    bool active;
+    void (*fhss_timer_callback)(const fhss_api_t *fhss_api, uint16_t) = nullptr;
+    uint32_t start_time = 0;
+    uint32_t stop_time = 0;
+    bool active = false;
     SingletonPtr<Timeout> timeout;
 };
 
@@ -173,3 +181,4 @@ fhss_timer_t fhss_functions = {
     .fhss_resolution_divider = 1
 };
 
+#endif

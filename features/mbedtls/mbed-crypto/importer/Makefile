@@ -29,8 +29,8 @@
 
 # Set the Mbed Crypto release to import (this can/should be edited before
 # import)
-CRYPTO_RELEASE ?= mbedcrypto-1.1.1
-CRYPTO_REPO_URL ?= git@github.com:ARMmbed/mbed-crypto.git
+CRYPTO_RELEASE ?= mbedcrypto-2.0.0
+CRYPTO_REPO_URL ?= git@github.com:ARMmbed/mbedtls-psa.git
 
 # Translate between Mbed Crypto namespace and Mbed OS namespace
 TARGET_PREFIX:=..
@@ -59,6 +59,7 @@ TARGET_NSPE:=$(TARGET_SRV_IMPL)/COMPONENT_NSPE
 # Mbed Crypto source directory - hidden from mbed via TARGET_IGNORE
 CRYPTO_DIR:=TARGET_IGNORE/mbed-crypto
 CRYPTO_API:=$(CRYPTO_DIR)/include/psa
+OLD_CRYPTO_API:=$(CRYPTO_DIR)/include/mbedtls
 CRYPTO_GIT_CFG=$(CRYPTO_DIR)/.git/config
 
 
@@ -72,6 +73,15 @@ rsync:
 	rm -rf $(TARGET_INC)
 	mkdir -p $(TARGET_INC)
 	rsync -a --delete --exclude='crypto_struct.h' $(CRYPTO_API) $(TARGET_INC)/
+	# Copy legacy Mbed TLS crypto headers, excluding headers duplicated in
+	# Mbed TLS.
+	rsync -a --delete \
+	    --exclude='check_config.h' \
+	    --exclude='compat-1.3.h' \
+	    --exclude='config.h' \
+	    --exclude='error.h' \
+	    --exclude='version.h' \
+	    $(OLD_CRYPTO_API) $(TARGET_INC)/
 	#
 	# Copying licenses
 	cp $(CRYPTO_DIR)/LICENSE $(TARGET_PREFIX)/
@@ -80,6 +90,7 @@ rsync:
 	# Copying Mbed Crypto into Mbed OS...
 	rm -rf $(TARGET_SRV_IMPL)
 	rm -rf $(TARGET_SPE)
+	rm -rf $(TARGET_SRC)
 
 	mkdir -p $(TARGET_SRV_IMPL)
 	mkdir -p $(TARGET_SPE)

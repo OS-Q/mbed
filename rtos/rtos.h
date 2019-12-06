@@ -1,6 +1,4 @@
 
-/** \addtogroup rtos */
-/** @{*/
 /* mbed Microcontroller Library
  * Copyright (c) 2006-2012 ARM Limited
  *
@@ -25,7 +23,7 @@
 #ifndef RTOS_H
 #define RTOS_H
 
-#include "mbed_rtos_storage.h"
+#include "rtos/mbed_rtos_storage.h"
 #include "rtos/Kernel.h"
 #include "rtos/Thread.h"
 #include "rtos/ThisThread.h"
@@ -38,12 +36,13 @@
 #include "rtos/EventFlags.h"
 #include "rtos/ConditionVariable.h"
 
+
+/** \defgroup rtos-public-api RTOS
+ * \ingroup mbed-os-public
+ */
+
 #ifndef MBED_NO_GLOBAL_USING_DIRECTIVE
 using namespace rtos;
 #endif
 
-#include "platform/mbed_version.h"
-
 #endif
-
-/** @}*/

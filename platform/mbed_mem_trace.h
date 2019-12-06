@@ -1,9 +1,5 @@
-
-/** \addtogroup platform */
-/** @{*/
-
 /* mbed Microcontroller Library
- * Copyright (c) 2006-2016 ARM Limited
+ * Copyright (c) 2006-2019 ARM Limited
  * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,6 +24,9 @@ extern "C" {
 
 #include <stdint.h>
 #include <stddef.h>
+
+/** \addtogroup platform-public-api */
+/** @{*/
 
 /**
  * enum Memory operation types for tracer

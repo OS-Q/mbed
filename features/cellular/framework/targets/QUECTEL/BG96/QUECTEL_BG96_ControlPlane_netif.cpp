@@ -7,18 +7,7 @@ QUECTEL_BG96_ControlPlane_netif::QUECTEL_BG96_ControlPlane_netif(ATHandler &at, 
 
 nsapi_size_or_error_t QUECTEL_BG96_ControlPlane_netif::send(const void *data, nsapi_size_t size)
 {
-    _at.lock();
-
-    _at.cmd_start("AT+QCFGEXT=\"nipds\",0,");
-    _at.write_string((char *)data);
-    _at.write_int(size);
-    _at.cmd_stop();
-    _at.resp_start();
-    _at.resp_stop();
-
-    nsapi_error_t err = _at.get_last_error();
-
-    _at.unlock();
+    nsapi_size_or_error_t err = _at.at_cmd_discard("+QCFGEXT", "=\"nipds\",0,", "%s%d", data, size);
 
     if (err == NSAPI_ERROR_OK) {
         return size;
@@ -31,8 +20,7 @@ nsapi_size_or_error_t QUECTEL_BG96_ControlPlane_netif::recv(void *buffer, nsapi_
 {
     _at.lock();
 
-    _at.cmd_start("AT+QCFGEXT=\"nipdr\",0");
-    _at.cmd_stop();
+    _at.cmd_start_stop("QCFGEXT", "=", "%s%d", "nipdr", 0);
     _at.resp_start("+QCFGEXT: ");
     // skip 3 params: "nipdr",<total_receive_length>,<have_read_length>
     _at.skip_param(3);
@@ -45,9 +33,7 @@ nsapi_size_or_error_t QUECTEL_BG96_ControlPlane_netif::recv(void *buffer, nsapi_
         return NSAPI_ERROR_WOULD_BLOCK;
     }
 
-    _at.cmd_start("AT+QCFGEXT=\"nipdr\",");
-    _at.write_int(unread_length);
-    _at.cmd_stop();
+    _at.cmd_start_stop("QCFGEXT", "=", "%s%d", "nipdr", unread_length);
 
     _at.resp_start("+QCFGEXT:");
     // skip "nipdr"

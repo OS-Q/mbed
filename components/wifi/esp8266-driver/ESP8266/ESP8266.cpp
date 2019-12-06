@@ -33,7 +33,6 @@
 
 #define TRACE_GROUP  "ESPA" // ESP8266 AT layer
 
-#define ESP8266_DEFAULT_BAUD_RATE   115200
 #define ESP8266_ALL_SOCKET_IDS      -1
 
 using namespace mbed;
@@ -43,24 +42,26 @@ ESP8266::ESP8266(PinName tx, PinName rx, bool debug, PinName rts, PinName cts)
       _at_v(-1, -1, -1),
       _tcp_passive(false),
       _callback(0),
-      _serial(tx, rx, ESP8266_DEFAULT_BAUD_RATE),
+      _serial(tx, rx, MBED_CONF_ESP8266_SERIAL_BAUDRATE),
       _serial_rts(rts),
       _serial_cts(cts),
       _parser(&_serial),
       _packets(0),
       _packets_end(&_packets),
+      _sock_active_id(-1),
       _heap_usage(0),
       _connect_error(0),
       _disconnect(false),
       _fail(false),
       _sock_already(false),
       _closed(false),
+      _error(false),
       _busy(false),
       _reset_check(_rmutex),
       _reset_done(false),
       _conn_status(NSAPI_STATUS_DISCONNECTED)
 {
-    _serial.set_baud(ESP8266_DEFAULT_BAUD_RATE);
+    _serial.set_baud(MBED_CONF_ESP8266_SERIAL_BAUDRATE);
     _parser.debug_on(debug);
     _parser.set_delimiter("\r\n");
     _parser.oob("+IPD", callback(this, &ESP8266::_oob_packet_hdlr));
@@ -97,6 +98,10 @@ ESP8266::ESP8266(PinName tx, PinName rx, bool debug, PinName rts, PinName cts)
         _sock_i[i].tcp_data_avbl = 0;
         _sock_i[i].tcp_data_rcvd = 0;
     }
+
+    _scan_r.res = NULL;
+    _scan_r.limit = 0;
+    _scan_r.cnt = 0;
 }
 
 bool ESP8266::at_available()
@@ -179,7 +184,7 @@ bool ESP8266::stop_uart_hw_flow_ctrl(void)
         _serial.set_flow_control(SerialBase::Disabled, _serial_rts, _serial_cts);
 
         // Stop ESP8266's flow control
-        done = _parser.send("AT+UART_CUR=%u,8,1,0,0", ESP8266_DEFAULT_BAUD_RATE)
+        done = _parser.send("AT+UART_CUR=%u,8,1,0,0", MBED_CONF_ESP8266_SERIAL_BAUDRATE)
                && _parser.recv("OK\n");
     }
 
@@ -195,7 +200,7 @@ bool ESP8266::start_uart_hw_flow_ctrl(void)
     _smutex.lock();
     if (_serial_rts != NC && _serial_cts != NC) {
         // Start ESP8266's flow control
-        done = _parser.send("AT+UART_CUR=%u,8,1,0,3", ESP8266_DEFAULT_BAUD_RATE)
+        done = _parser.send("AT+UART_CUR=%u,8,1,0,3", MBED_CONF_ESP8266_SERIAL_BAUDRATE)
                && _parser.recv("OK\n");
 
         if (done) {
@@ -207,12 +212,12 @@ bool ESP8266::start_uart_hw_flow_ctrl(void)
         _serial.set_flow_control(SerialBase::RTS, _serial_rts, NC);
 
         // Enable ESP8266's CTS pin
-        done = _parser.send("AT+UART_CUR=%u,8,1,0,2", ESP8266_DEFAULT_BAUD_RATE)
+        done = _parser.send("AT+UART_CUR=%u,8,1,0,2", MBED_CONF_ESP8266_SERIAL_BAUDRATE)
                && _parser.recv("OK\n");
 
     } else if (_serial_cts != NC) {
         // Enable ESP8266's RTS pin
-        done = _parser.send("AT+UART_CUR=%u,8,1,0,1", ESP8266_DEFAULT_BAUD_RATE)
+        done = _parser.send("AT+UART_CUR=%u,8,1,0,1", MBED_CONF_ESP8266_SERIAL_BAUDRATE)
                && _parser.recv("OK\n");
 
         if (done) {
@@ -328,8 +333,8 @@ nsapi_error_t ESP8266::connect(const char *ap, const char *passPhrase)
     _smutex.lock();
     set_timeout(ESP8266_CONNECT_TIMEOUT);
 
-    _parser.send("AT+CWJAP_CUR=\"%s\",\"%s\"", ap, passPhrase);
-    if (!_parser.recv("OK\n")) {
+    bool res = _parser.send("AT+CWJAP_CUR=\"%s\",\"%s\"", ap, passPhrase);
+    if (!res || !_parser.recv("OK\n")) {
         if (_fail) {
             if (_connect_error == 1) {
                 ret = NSAPI_ERROR_CONNECTION_TIMEOUT;
@@ -421,7 +426,7 @@ const char *ESP8266::netmask()
 
 int8_t ESP8266::rssi()
 {
-    int8_t rssi;
+    int8_t rssi = 0;
     char bssid[18];
 
     _smutex.lock();
@@ -432,17 +437,27 @@ int8_t ESP8266::rssi()
         _smutex.unlock();
         return 0;
     }
+
     set_timeout();
     _smutex.unlock();
+
+    WiFiAccessPoint ap[1];
+    _scan_r.res = ap;
+    _scan_r.limit = 1;
+    _scan_r.cnt = 0;
 
     _smutex.lock();
     set_timeout(ESP8266_CONNECT_TIMEOUT);
     if (!(_parser.send("AT+CWLAP=\"\",\"%s\",", bssid)
-            && _parser.recv("+CWLAP:(%*d,\"%*[^\"]\",%hhd,", &rssi)
             && _parser.recv("OK\n"))) {
-        _smutex.unlock();
-        return 0;
+        rssi = 0;
+    } else if (_scan_r.cnt == 1) {
+        //All OK so read and return rssi
+        rssi = ap[0].get_rssi();
     }
+
+    _scan_r.cnt = 0;
+    _scan_r.res = NULL;
     set_timeout();
     _smutex.unlock();
 
@@ -475,6 +490,7 @@ int ESP8266::scan(WiFiAccessPoint *res, unsigned limit, scan_mode mode, unsigned
             _scan_r.cnt = NSAPI_ERROR_DEVICE_ERROR;
         }
     }
+
 
     int cnt = _scan_r.cnt;
     _scan_r.res = NULL;

@@ -49,17 +49,24 @@ extern uint32_t Load$$LR$$LR_IROM1$$Limit[];
 
 namespace mbed {
 
-/** \addtogroup drivers */
+/** \addtogroup drivers-public-api */
+/** @{*/
+
+/**
+ * \defgroup drivers_FlashIAP FlashIAP class
+ * @{
+ */
 
 /** Flash IAP driver. It invokes flash HAL functions.
  *
  * @note Synchronization level: Thread safe
- * @ingroup drivers
  */
 class FlashIAP : private NonCopyable<FlashIAP> {
 public:
-    FlashIAP();
-    ~FlashIAP();
+    constexpr FlashIAP() : _flash(), _page_buf(nullptr)
+    {
+
+    }
 
     /** Initialize a flash IAP device
      *
@@ -158,6 +165,9 @@ private:
     static SingletonPtr<PlatformMutex> _mutex;
 #endif
 };
+
+/** @}*/
+/** @}*/
 
 } /* namespace mbed */
 
