@@ -7,7 +7,7 @@
 
 ### [Framework 描述](https://github.com/OS-Q/N02/wiki) 
 
-[Framework N02](https://github.com/OS-Q/N02) 基于PlatformIO平台，应用于[STM32](https://github.com/sochub/STM32) 系列的mbed 框架
+[Framework N02](https://github.com/OS-Q/N02) 基于PlatformIO平台，应用[mbed](http://mbed.org) 框架
 
 ### [OS-Q = Open Solutions | Open Source |  Operating System ](http://www.OS-Q.com/N02)
 ####  2019-9-9

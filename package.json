@@ -1,7 +1,7 @@
 {
-    "description": "Framework mbed for stm32",
+    "description": "Framework N02 mbed for STM32",
     "name": "framework-N02",
-    "system": "all",
+    "system": "*",
     "url": "http://mbed.org",
     "version": "1.0.0"
 }
