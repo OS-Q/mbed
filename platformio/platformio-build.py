@@ -12,7 +12,7 @@ from platformio.builder.tools.piolib import PlatformIOLibBuilder
 env = DefaultEnvironment()
 platform = env.PioPlatform()
 
-FRAMEWORK_DIR = platform.get_package_dir("framework-N2")
+FRAMEWORK_DIR = platform.get_package_dir("framework-N02")
 assert isdir(FRAMEWORK_DIR)
 
 # Be sure that the packages and tools paths are in the search path

@@ -1,3 +1,4 @@
 *.pyc
+platformio/*.pyc
 .pio/
 .vscode/
