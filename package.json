@@ -1,7 +1,7 @@
 {
-    "description": "Framework N02 mbed for STM32",
     "name": "framework-N02",
+    "description": "arm mbed framework",
     "system": "*",
-    "url": "http://mbed.org",
-    "version": "1.0.0"
+    "url": "https://github.com/OS-Q/N02",
+    "version": "6.51401.200402"
 }

@@ -2,3 +2,4 @@
 platformio/*.pyc
 .pio/
 .vscode/
+.rst
