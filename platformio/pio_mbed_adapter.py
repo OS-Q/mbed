@@ -101,7 +101,7 @@ class PlatformioMbedAdapter(object):
 
             result.append(s)
 
-        # Symbols need to be sorted to aboid recompilation
+        # Symbols need to be sorted to avoid recompilation
         result.sort()
         return result
 
@@ -214,7 +214,7 @@ class PlatformioMbedAdapter(object):
             "inc_dirs": self.resources.inc_dirs,
             "ldscript": [self.resources.linker_script],
             "objs": self.resources.objects,
-            "build_flags": self.toolchain.flags,
+            "build_flags": {k: sorted(v) for k, v in self.toolchain.flags.items()},
             "libs": [basename(l) for l in self.resources.libraries],
             "lib_paths": self.resources.lib_dirs,
             "syslibs": self.toolchain.sys_libs,

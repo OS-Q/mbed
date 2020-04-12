@@ -1,8 +1,23 @@
+# Copyright 2019-present PlatformIO <contact@platformio.org>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
 import sys
 import warnings
 from shutil import copyfile
 from os import makedirs
-from os.path import basename, isdir, isfile, join
+from os.path import basename, isabs, isdir, isfile, join
 
 from SCons.Script import COMMAND_LINE_TARGETS, Builder, DefaultEnvironment
 
@@ -11,6 +26,7 @@ from platformio.builder.tools.piolib import PlatformIOLibBuilder
 
 env = DefaultEnvironment()
 platform = env.PioPlatform()
+board = env.BoardConfig()
 
 FRAMEWORK_DIR = platform.get_package_dir("framework-N02")
 assert isdir(FRAMEWORK_DIR)
@@ -77,7 +93,9 @@ def get_dynamic_manifest(lib_path):
 
     config = lib_processor.extract_project_info(generate_config=False)
     src_files = _fix_paths(config.get("src_files"), lib_path)
-    inc_dirs = _fix_paths(config.get("inc_dirs"), lib_path)
+
+    inc_dirs = [join(FRAMEWORK_DIR, d).replace("\\", "/") for d in config.get(
+        "inc_dirs") if not isabs(d)]
 
     name = basename(lib_path)
 
@@ -90,8 +108,14 @@ def get_dynamic_manifest(lib_path):
         }
     }
 
-    manifest['build']['flags'].extend(
-        ['-I "%s"' % d for d in inc_dirs])
+    if inc_dirs:
+        extra_script = join(env.subst("$BUILD_DIR"), name + "_extra_script.py")
+        manifest['build']['extraScript'] = extra_script.replace("\\", "/")
+        if not isfile(extra_script):
+            with open(extra_script, "w") as fp:
+                fp.write("Import('env')\n")
+                fp.write(
+                    "env.Prepend(CPPPATH=[%s])" % ("'" + "', '".join(inc_dirs) + "'"))
 
     for f in src_files:
         manifest['build']['srcFilter'].extend([" +<%s>" % f])
@@ -104,7 +128,7 @@ def get_mbed_target(board_type):
         join(FRAMEWORK_DIR, "platformio", "variants_remap.json"))
     variant = variants_remap[
         board_type] if board_type in variants_remap else board_type.upper()
-    return env.BoardConfig().get("build.mbed_variant", variant)
+    return board.get("build.mbed_variant", variant)
 
 
 def get_build_profile(cpp_defines):
@@ -118,6 +142,7 @@ def get_build_profile(cpp_defines):
 #
 # Print warnings about deprecated flags
 #
+
 
 cpp_defines = env.Flatten(env.get("CPPDEFINES", []))
 for f in ("PIO_FRAMEWORK_MBED_FILESYSTEM_PRESENT",
@@ -218,26 +243,23 @@ if "nordicnrf5" in env.get("PIOPLATFORM"):
 # Linker requires preprocessing with link flags
 #
 
-ldscript = None
-if configuration.get("ldscript", [])[0]:
-    ldscript = join(FRAMEWORK_DIR, configuration.get("ldscript")[0])
-elif env.get("LDSCRIPT_PATH", None):
-    ldscript = env.subst(env.get("LDSCRIPT_PATH"))
-else:
-    print ("Default Linker script is not found!")
+if not board.get("build.ldscript", ""):
+    ldscript = join(FRAMEWORK_DIR, configuration.get("ldscript", [])[0] or "")
+    if board.get("build.mbed.ldscript", ""):
+        ldscript = env.subst(board.get("build.mbed.ldscript"))
+    if isfile(ldscript):
+        linker_script = env.Command(
+            join("$BUILD_DIR", "%s.link_script.ld" % basename(ldscript)),
+            ldscript,
+            env.VerboseAction(
+                '%s -E -P $LINKFLAGS $SOURCE -o $TARGET' %
+                env.subst("$GDB").replace("-gdb", "-cpp"),
+                "Generating LD script $TARGET"))
 
-if ldscript:
-    linker_script = env.Command(
-        join("$BUILD_DIR",
-             "%s.link_script.ld" % basename(ldscript)),
-        ldscript,
-        env.VerboseAction(
-            '%s -E -P $LINKFLAGS $SOURCE -o $TARGET' %
-            env.subst("$GDB").replace("-gdb", "-cpp"),
-            "Generating LD script $TARGET"))
-
-    env.Depends("$BUILD_DIR/$PROGNAME$PROGSUFFIX", linker_script)
-    env.Replace(LDSCRIPT_PATH=linker_script)
+        env.Depends("$BUILD_DIR/$PROGNAME$PROGSUFFIX", linker_script)
+        env.Replace(LDSCRIPT_PATH=linker_script)
+    else:
+        print ("Warning! Couldn't find linker script file!")
 
 #
 # Compile core part

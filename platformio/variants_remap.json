@@ -21,6 +21,7 @@
     "frdm_kl46z": "KL46Z",
     "frdm_k64f": "K64F",
     "frdm_k82f": "K82F",
+    "frdm_kl82z": "KL82Z",
     "IBMEthernetKit": "K64F",
     "frdm_k66f": "K66F",
     "frdm_kl05z": "KL05Z",
@@ -35,13 +36,9 @@
     "bbcmicrobit": "NRF51_MICROBIT",
     "bbcmicrobit_b": "NRF51_MICROBIT_B",
     "disco_f030r8": "NUCLEO_F030R8",
-    "STM32F030R8": "NUCLEO_F030R8",
     "cloud_jam": "NUCLEO_F401RE",
     "cloud_jam_l4": "NUCLEO_L476RG",
-    "STM32F103RB": "NUCLEO_F103RB",
-    "STM32F103C8": "BLUEPILL_F103C8",
     "genericSTM32F103RB": "NUCLEO_F103RB",
     "genericSTM32F103C8": "BLUEPILL_F103C8",
-    "STM32F103CB": "F103CB",
     "genericSTM32F103CB": "F103CB"
 }
