@@ -1,5 +1,6 @@
 /* mbed Microcontroller Library
  * Copyright (c) 2016 ARM Limited
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,6 +84,10 @@ typedef enum {
 typedef enum {
     QSPI_1 = (int)QSPI_R_BASE,
 } QSPIName;
+
+typedef enum {
+    USB_FS = (int)USB_OTG_FS_PERIPH_BASE
+} USBName;
 
 #ifdef __cplusplus
 }

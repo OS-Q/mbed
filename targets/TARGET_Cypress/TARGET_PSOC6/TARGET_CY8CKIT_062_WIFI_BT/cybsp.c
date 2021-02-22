@@ -2,12 +2,12 @@
 * \file cybsp.c
 *
 * Description:
-* Provides initialization code for starting up the hardware contained on the 
+* Provides initialization code for starting up the hardware contained on the
 * Cypress board.
 *
 ********************************************************************************
 * \copyright
-* Copyright 2018-2019 Cypress Semiconductor Corporation
+* Copyright 2018-2020 Cypress Semiconductor Corporation
 * SPDX-License-Identifier: Apache-2.0
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,16 +24,20 @@
 *******************************************************************************/
 
 #include <stdlib.h>
+#include "cy_syspm.h"
+#include "cy_sysclk.h"
 #include "cybsp.h"
-#include "cyhal_utils.h"
-#include "cycfg.h"
+#if defined(CY_USING_HAL)
+#include "cyhal_hwmgr.h"
+#include "cyhal_syspm.h"
+#endif
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
 /* The sysclk deep sleep callback is recommended to be the last callback that
-* is executed before entry into deep sleep mode and the first one upon 
+* is executed before entry into deep sleep mode and the first one upon
 * exit the deep sleep mode.
 * Doing so minimizes the time spent on low power mode entry and exit.
 */
@@ -41,7 +45,7 @@ extern "C" {
     #define CYBSP_SYSCLK_PM_CALLBACK_ORDER  (255u)
 #endif
 
-#if defined(CYBSP_WIFI_CAPABLE)
+#if defined(CYBSP_WIFI_CAPABLE) && defined(CY_USING_HAL)
 static cyhal_sdio_t sdio_obj;
 
 cyhal_sdio_t* cybsp_get_wifi_sdio_obj(void)
@@ -76,19 +80,31 @@ static cy_rslt_t cybsp_register_sysclk_pm_callback(void)
 cy_rslt_t cybsp_init(void)
 {
     /* Setup hardware manager to track resource usage then initialize all system (clock/power) board configuration */
+#if defined(CY_USING_HAL)
     cy_rslt_t result = cyhal_hwmgr_init();
-    init_cycfg_system();
+
+    if (CY_RSLT_SUCCESS == result)
+    {
+        result = cyhal_syspm_init();
+    }
+#else
+    cy_rslt_t result = CY_RSLT_SUCCESS;
+#endif
+
+#if defined(COMPONENT_BSP_DESIGN_MODUS) || defined(COMPONENT_CUSTOM_DESIGN_MODUS)
+    init_cycfg_all();
+#endif
 
     if (CY_RSLT_SUCCESS == result)
     {
         result = cybsp_register_sysclk_pm_callback();
     }
 
-#if defined(CYBSP_WIFI_CAPABLE)
+#if defined(CYBSP_WIFI_CAPABLE) && defined(CY_USING_HAL)
     /* Initialize SDIO interface. This must be done before other HAL API calls as some SDIO implementations require
      * specific peripheral instances.
-     * NOTE: The full WiFi interface still needs to be initialized via cybsp_wifi_init_primary(). This is typically 
-     * done when starting up WiFi. 
+     * NOTE: The full WiFi interface still needs to be initialized via cybsp_wifi_init_primary(). This is typically
+     * done when starting up WiFi.
      */
     if (CY_RSLT_SUCCESS == result)
     {

@@ -1,6 +1,7 @@
 """
 mbed SDK
 Copyright (c) 2011-2013 ARM Limited
+SPDX-License-Identifier: Apache-2.0
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,7 +16,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-class DevNullTest():
+class DevNullTest(object):
 
     def check_readline(self, selftest, text):
         """ Reads line from serial port and checks if text was part of read string

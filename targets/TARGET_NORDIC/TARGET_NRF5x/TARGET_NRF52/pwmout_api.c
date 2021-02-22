@@ -143,7 +143,7 @@ void pwmout_init(pwmout_t *obj, PinName pin)
     /* Get hardware instance from pinmap. */
     int instance = pin_instance_pwm(pin);
 
-    MBED_ASSERT(instance < (int) (sizeof(nordic_nrf5_pwm_instance) / sizeof(nrfx_pwm_t)));
+    MBED_ASSERT(instance < (int)(sizeof(nordic_nrf5_pwm_instance) / sizeof(nrfx_pwm_t)));
 
     /* Populate PWM object with default values. */
     obj->instance = instance;
@@ -287,6 +287,11 @@ void pwmout_period_us(pwmout_t *obj, int period)
     nordic_pwm_restart(obj);
 }
 
+int pwmout_read_period_us(pwmout_t *obj)
+{
+    return obj->period;
+}
+
 /** Set the PWM pulsewidth specified in seconds, keeping the period the same.
  *
  * Parameter obj     The pwmout object
@@ -297,7 +302,7 @@ void pwmout_pulsewidth(pwmout_t *obj, float pulse)
     DEBUG_PRINTF("pwmout_pulsewidt: %f\r\n", pulse);
 
     /* Cap pulsewidth to period before setting it. */
-    if ((pulse * 1000000) > (float) (obj->pulse & ~SEQ_POLARITY_BIT)) {
+    if ((pulse * 1000000) > (float) obj->period) {
         obj->pulse &= SEQ_POLARITY_BIT;
         obj->pulse |= obj->period;
         pwmout_pulsewidth_us(obj, obj->pulse);
@@ -348,10 +353,13 @@ void pwmout_pulsewidth_us(pwmout_t *obj, int pulse)
     nordic_pwm_restart(obj);
 }
 
+int pwmout_read_pulsewidth_us(pwmout_t *obj) {
+    return (obj->period) * (obj->percent);
+}
+
 const PinMap *pwmout_pinmap()
 {
     return PinMap_PWM_testing;
 }
 
 #endif // DEVICE_PWMOUT
-

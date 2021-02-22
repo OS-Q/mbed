@@ -709,14 +709,15 @@ class IntelHex(object):
         if fclose:
             fclose()
 
-    def tofile(self, fobj, format):
+    def tofile(self, fobj, format, byte_count=16):
         """Write data to hex or bin file. Preferred method over tobin or tohex.
 
         @param  fobj        file name or file-like object
         @param  format      file format ("hex" or "bin")
+        @param  byte_count  bytes per line
         """
         if format == 'hex':
-            self.write_hex_file(fobj)
+            self.write_hex_file(fobj, byte_count=byte_count)
         elif format == 'bin':
             self.tobinfile(fobj)
         else:
@@ -763,6 +764,22 @@ class IntelHex(object):
         """Put bytes string in object at addr and append terminating zero at end."""
         self.puts(addr, s)
         self._buf[addr+len(s)] = 0
+
+    def find(self, sub, start=None, end=None):
+        """Return the lowest index in self[start:end] where subsection sub is found.
+        Optional arguments start and end are interpreted as in slice notation.
+        
+        @param  sub     bytes-like subsection to find
+        @param  start   start of section to search within (optional)
+        @param  end     end of section to search within (optional)
+        """
+        sub = bytes(sub)
+        for start, end in self[slice(start,end)].segments():
+            b = self.gets(start, end-start)
+            i = b.find(sub)
+            if i != -1:
+                return start+i
+        return -1
 
     def dump(self, tofile=None, width=16, withpadding=False):
         """Dump object content to specified file object or to stdout if None.
@@ -873,10 +890,11 @@ class IntelHex(object):
                 elif overlap == 'replace':
                     self.start_addr = other.start_addr
 
-    def segments(self):
+    def segments(self, min_gap=1):
         """Return a list of ordered tuple objects, representing contiguous occupied data addresses.
         Each tuple has a length of two and follows the semantics of the range and xrange objects.
         The second entry of the tuple is always an integer greater than the first entry.
+        @param min_gap      the minimum gap size between data in order to separate the segments
         """
         addresses = self.addresses()
         if not addresses:
@@ -884,12 +902,12 @@ class IntelHex(object):
         elif len(addresses) == 1:
             return([(addresses[0], addresses[0]+1)])
         adjacent_differences = [(b - a) for (a, b) in zip(addresses[:-1], addresses[1:])]
-        breaks = [i for (i, x) in enumerate(adjacent_differences) if x > 1]
+        breaks = [i for (i, x) in enumerate(adjacent_differences) if x > min_gap]
         endings = [addresses[b] for b in breaks]
         endings.append(addresses[-1])
-        beginings = [addresses[b+1] for b in breaks]
-        beginings.insert(0, addresses[0])
-        return [(a, b+1) for (a, b) in zip(beginings, endings)]
+        beginnings = [addresses[b+1] for b in breaks]
+        beginnings.insert(0, addresses[0])
+        return [(a, b+1) for (a, b) in zip(beginnings, endings)]
         
     def get_memory_size(self):
         """Returns the approximate memory footprint for data."""

@@ -21,17 +21,19 @@
  * Based on mbed-stress-test by Marcus Chang @ Arm Mbed - http://github.com/ARMmbed/mbed-stress-test
 */
 
+#if !INTEGRATION_TESTS
+#error [NOT_SUPPORTED] integration tests not enabled for this target
+#elif !MBED_CONF_RTOS_PRESENT
+#error [NOT_SUPPORTED] integration tests require RTOS
+#else
+
 #include "mbed.h"
 #include "utest/utest.h"
 #include "unity/unity.h"
 #include "greentea-client/test_env.h"
-#include "common_defines_test.h"
+#include "common_defines_net_test.h"
 #include "download_test.h"
 #include <string>
-
-#if !INTEGRATION_TESTS
-#error [NOT_SUPPORTED] integration tests not enabled for this target
-#endif
 
 #ifdef MBED_CONF_APP_BASICS_TEST_FILENAME
 #include MBED_CONF_APP_BASICS_TEST_FILENAME
@@ -47,11 +49,9 @@ using namespace utest::v1;
 
 #if !defined(MBED_CONF_APP_NO_LED)
 DigitalOut led1(LED1);
-DigitalOut led2(LED2);
 void led_thread()
 {
     led1 = !led1;
-    led2 = !led1;
 }
 #endif
 
@@ -68,12 +68,11 @@ static control_t setup_network(const size_t call_count)
         if (err == NSAPI_ERROR_OK) {
             break;
         } else {
-            printf("[ERROR] Connecting to network. Retrying %d of %d.\r\n", tries, MAX_RETRIES);
+            tr_error("[ERROR] Connecting to network. Retrying %d of %d.", tries, MAX_RETRIES);
         }
     }
     TEST_ASSERT_EQUAL(NSAPI_ERROR_OK, err);
-    printf("[NET] IP address is '%s'\n", net->get_ip_address());
-    printf("[NET] MAC address is '%s'\n", net->get_mac_address());
+
     return CaseNext;
 }
 
@@ -102,7 +101,7 @@ static control_t download_2_threads(const size_t call_count)
     Thread t1;
     Thread t2;
     t1.start(download_fn);
-    wait(0.5);
+    ThisThread::sleep_for(1);
     t2.start(download_fn);
     t2.join();
     t1.join();
@@ -123,26 +122,6 @@ static control_t download_3_threads(const size_t call_count)
     t1.join();
     t2.join();
     t3.join();
-
-    return CaseNext;
-}
-
-static control_t download_4_threads(const size_t call_count)
-{
-    thread_counter = 0;
-
-    Thread t1;
-    Thread t2;
-    Thread t3;
-    Thread t4;
-    t1.start(download_fn);
-    t2.start(download_fn);
-    t3.start(download_fn);
-    t4.start(download_fn);
-    t1.join();
-    t2.join();
-    t3.join();
-    t4.join();
 
     return CaseNext;
 }
@@ -173,3 +152,4 @@ int main()
 
     return !Harness::run(specification);
 }
+#endif // !INTEGRATION_TESTS

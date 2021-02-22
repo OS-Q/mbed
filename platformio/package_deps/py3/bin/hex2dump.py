@@ -1,4 +1,4 @@
-#!C:\Python37\python.exe
+#!E:\Projects\platformio-core\.tox\py39\Scripts\python.exe
 
 # Copyright (c) 2008-2018 Alexander Belchenko
 # All rights reserved.
@@ -35,7 +35,7 @@
 
 """Show content of hex file as hexdump."""
 
-VERSION = '2.2'
+VERSION = '2.3.0'
 
 USAGE = '''hex2dump: show content of hex file as hexdump.
 Usage:

@@ -53,18 +53,11 @@ from tools.paths import HOST_TESTS
 from tools.utils import ToolException
 from tools.utils import NotSupportedException
 from tools.utils import construct_enum
-from tools.memap import MemapParser
 from tools.targets import TARGET_MAP, Target
 from tools.config import Config
 import tools.test_configs as TestConfig
 from tools.build_api import build_project, build_mbed_libs, build_lib
 from tools.build_api import get_target_supported_toolchains
-from tools.build_api import write_build_report
-from tools.build_api import prep_report
-from tools.build_api import prep_properties
-from tools.build_api import create_result
-from tools.build_api import add_result_to_report
-from tools.build_api import prepare_toolchain
 from tools.build_api import get_config
 from tools.resources import Resources, MbedIgnoreSet, IGNORE_FILENAME
 from tools.libraries import LIBRARIES, LIBRARY_MAP
@@ -1468,11 +1461,11 @@ def get_avail_tests_summary_table(cols=None, result_summary=True, join_delim=','
 def progress_bar(percent_progress, saturation=0):
     """ This function creates progress bar with optional simple saturation mark
     """
-    step = int(percent_progress / 2)    # Scale by to (scale: 1 - 50)
+    step = percent_progress // 2    # Scale by to (scale: 1 - 50)
     str_progress = '#' * step + '.' * int(50 - step)
     c = '!' if str_progress[38] == '.' else '|'
     if saturation > 0:
-        saturation = saturation / 2
+        saturation = saturation // 2
         str_progress = str_progress[:saturation] + c + str_progress[saturation:]
     return str_progress
 
@@ -1498,7 +1491,6 @@ def singletest_in_cli_mode(single_test):
                                                           shuffle_seed))
 
     print("Completed in %.2f sec" % elapsed_time)
-    print
     # Write summary of the builds
 
     print_report_exporter = ReportExporter(ResultExporterType.PRINT, package="build")
@@ -1525,7 +1517,7 @@ def singletest_in_cli_mode(single_test):
     # Returns True if no build failures of the test projects or their dependencies
     return status
 
-class TestLogger():
+class TestLogger(object):
     """ Super-class for logging and printing ongoing events for test suite pass
     """
     def __init__(self, store_log=True):
@@ -2083,7 +2075,6 @@ def build_test_worker(*args, **kwargs):
                   This includes arguments that were modified (ex. report)
     }
     """
-    bin_file = None
     ret = {
         'result': False,
         'args': args,
@@ -2121,7 +2112,7 @@ def build_tests(tests, base_source_paths, build_path, target, toolchain_name,
                 silent=False, report=None, properties=None,
                 continue_on_build_fail=False, app_config=None,
                 build_profile=None, stats_depth=None, ignore=None,
-                resource_filter=None):
+                resource_filter=None, coverage_patterns=None):
     """Given the data structure from 'find_tests' and the typical build parameters,
     build all the tests
 
@@ -2152,8 +2143,6 @@ def build_tests(tests, base_source_paths, build_path, target, toolchain_name,
         "test_apps": {}
     }
 
-    result = True
-
     jobs_count = int(jobs if jobs else cpu_count())
     p = Pool(processes=jobs_count)
     results = []
@@ -2163,7 +2152,6 @@ def build_tests(tests, base_source_paths, build_path, target, toolchain_name,
 
         test_build_path = os.path.join(build_path, test_paths[0])
         src_paths = base_source_paths + test_paths
-        bin_file = None
         test_case_folder_name = os.path.basename(test_paths[0])
 
         args = (src_paths, test_build_path, deepcopy(target), toolchain_name)
@@ -2180,6 +2168,7 @@ def build_tests(tests, base_source_paths, build_path, target, toolchain_name,
             'toolchain_paths': TOOLCHAIN_PATHS,
             'stats_depth': stats_depth,
             'notify': MockNotifier(),
+            'coverage_patterns': coverage_patterns, 
             'resource_filter': resource_filter
         }
 
@@ -2287,6 +2276,9 @@ def test_spec_from_test_builds(test_builds):
 
             if test_builds[build]['platform'].endswith('_NPSA'):
                 test_builds[build]['platform'] = test_builds[build]['platform'][:-5]
+        # Convert Dual Core target name to test spec platform name
+        if test_builds[build]['platform'].endswith('_CM4') or test_builds[build]['platform'].endswith('_CM7'):
+            test_builds[build]['platform'] = test_builds[build]['platform'][:-4]
     return {
         "builds": test_builds
     }

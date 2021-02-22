@@ -1,6 +1,7 @@
 """
 mbed SDK
 Copyright (c) 2011-2013 ARM Limited
+SPDX-License-Identifier: Apache-2.0
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -35,7 +36,7 @@ class TCPEchoClient_Handler(BaseRequestHandler):
             if not data: break
             self.request.sendall(data)
             if '{{end}}' in str(data):
-                print
+                print()
                 print(str(data))
             else:
                 if not count % 10:
@@ -43,7 +44,7 @@ class TCPEchoClient_Handler(BaseRequestHandler):
                 count += 1
             stdout.flush()
 
-class TCPEchoClientTest():
+class TCPEchoClientTest(object):
     def send_server_ip_port(self, selftest, ip_address, port_no):
         """ Set up network host. Reset target and and send server IP via serial to Mbed
         """

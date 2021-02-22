@@ -1,6 +1,7 @@
 """
 mbed SDK
 Copyright (c) 2011-2013 ARM Limited
+SPDX-License-Identifier: Apache-2.0
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -36,7 +37,7 @@ class UDPEchoClient_Handler(BaseRequestHandler):
             sys.stdout.write('.')
         stdout.flush()
 
-class UDPEchoClientTest():
+class UDPEchoClientTest(object):
 
     def send_server_ip_port(self, selftest, ip_address, port_no):
         c = selftest.mbed.serial_readline() # 'UDPCllient waiting for server IP and port...'

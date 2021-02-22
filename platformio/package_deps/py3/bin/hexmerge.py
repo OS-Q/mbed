@@ -1,4 +1,4 @@
-#!C:\Python37\python.exe
+#!E:\Projects\platformio-core\.tox\py39\Scripts\python.exe
 
 # Copyright (c) 2008-2018 Alexander Belchenko
 # All rights reserved.
@@ -35,7 +35,7 @@
 
 """Merge content of several hex files into one file."""
 
-VERSION = '2.2'
+VERSION = '2.3.0'
 
 USAGE = '''hexmerge: merge content of hex files.
 Usage:

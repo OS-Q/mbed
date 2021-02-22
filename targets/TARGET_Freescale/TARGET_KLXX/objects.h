@@ -1,5 +1,6 @@
 /* mbed Microcontroller Library
  * Copyright (c) 2006-2013 ARM Limited
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +30,6 @@ extern "C" {
 #define UARTLP_Type UART0_Type
 #elif defined(TARGET_KL43Z)
 #define UARTLP_Type LPUART_Type
-#elif defined(TARGET_KL26Z)
-	#define UARTLP_Type UART0_Type
 #endif
 
 struct gpio_irq_s {

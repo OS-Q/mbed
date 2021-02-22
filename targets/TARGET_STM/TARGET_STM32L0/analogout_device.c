@@ -1,29 +1,17 @@
 /* mbed Microcontroller Library
- * Copyright (c) 2015, STMicroelectronics
+ * SPDX-License-Identifier: BSD-3-Clause
+ ******************************************************************************
+ *
+ * Copyright (c) 2016-2020 STMicroelectronics.
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
  *
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of STMicroelectronics nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ ******************************************************************************
+
  */
 #include "mbed_assert.h"
 #include "analogout_api.h"
@@ -39,16 +27,22 @@
 static int channel1_used = 0;
 static int channel2_used = 0;
 
-void analogout_init(dac_t *obj, PinName pin)
+#if STATIC_PINMAP_READY
+#define ANALOGOUT_INIT_DIRECT analogout_init_direct
+void analogout_init_direct(dac_t *obj, const PinMap *pinmap)
+#else
+#define ANALOGOUT_INIT_DIRECT _analogout_init_direct
+static void _analogout_init_direct(dac_t *obj, const PinMap *pinmap)
+#endif
 {
     DAC_ChannelConfTypeDef sConfig = {0};
 
     // Get the peripheral name from the pin and assign it to the object
-    obj->dac = (DACName)pinmap_peripheral(pin, PinMap_DAC);
+    obj->dac = (DACName)pinmap->peripheral;
     MBED_ASSERT(obj->dac != (DACName)NC);
 
     // Get the pin function and assign the used channel to the object
-    uint32_t function = pinmap_function(pin, PinMap_DAC);
+    uint32_t function = (uint32_t)pinmap->function;
     MBED_ASSERT(function != (uint32_t)NC);
     switch (STM_PIN_CHANNEL(function)) {
         case 1:
@@ -65,10 +59,11 @@ void analogout_init(dac_t *obj, PinName pin)
     }
 
     // Configure GPIO
-    pinmap_pinout(pin, PinMap_DAC);
+    pin_function(pinmap->pin, pinmap->function);
+    pin_mode(pinmap->pin, PullNone);
 
     // Save the pin for future use
-    obj->pin = pin;
+    obj->pin = pinmap->pin;
 
     // Enable DAC clock
     __DAC_CLK_ENABLE();
@@ -95,6 +90,16 @@ void analogout_init(dac_t *obj, PinName pin)
     }
 
     analogout_write_u16(obj, 0);
+}
+
+void analogout_init(dac_t *obj, PinName pin)
+{
+    int peripheral = (int)pinmap_peripheral(pin, PinMap_DAC);
+    int function = (int)pinmap_find_function(pin, PinMap_DAC);
+
+    const PinMap static_pinmap = {pin, peripheral, function};
+
+    ANALOGOUT_INIT_DIRECT(obj, &static_pinmap);
 }
 
 void analogout_free(dac_t *obj)

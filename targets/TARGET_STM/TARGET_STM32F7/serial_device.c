@@ -234,8 +234,15 @@ int serial_getc(serial_t *obj)
     struct serial_s *obj_s = SERIAL_S(obj);
     UART_HandleTypeDef *huart = &uart_handlers[obj_s->index];
 
+    /* Computation of UART mask to apply to RDR register */
+    UART_MASK_COMPUTATION(huart);
+    uint16_t uhMask = huart->Mask;
+
     while (!serial_readable(obj));
-    return (int)(huart->Instance->RDR & 0x1FF);
+    /* When receiving with the parity enabled, the value read in the MSB bit
+     * is the received parity bit.
+     */
+    return (int)(huart->Instance->RDR & uhMask);
 }
 
 void serial_putc(serial_t *obj, int c)
@@ -244,7 +251,12 @@ void serial_putc(serial_t *obj, int c)
     UART_HandleTypeDef *huart = &uart_handlers[obj_s->index];
 
     while (!serial_writable(obj));
-    huart->Instance->TDR = (uint32_t)(c & 0x1FF);
+    /* When transmitting with the parity enabled (PCE bit set to 1 in the
+     * USART_CR1 register), the value written in the MSB (bit 7 or bit 8
+     * depending on the data length) has no effect because it is replaced
+     * by the parity.
+     */
+    huart->Instance->TDR = (uint16_t)(c & 0x1FFU);
 }
 
 void serial_clear(serial_t *obj)
@@ -252,8 +264,9 @@ void serial_clear(serial_t *obj)
     struct serial_s *obj_s = SERIAL_S(obj);
     UART_HandleTypeDef *huart = &uart_handlers[obj_s->index];
 
-    __HAL_UART_CLEAR_IT(huart, UART_FLAG_TXE);
-    __HAL_UART_CLEAR_IT(huart, UART_FLAG_RXNE);
+    /* Clear RXNE and error flags */
+    volatile uint32_t tmpval __attribute__((unused)) = huart->Instance->RDR;
+    HAL_UART_ErrorCallback(huart);
 }
 
 void serial_break_set(serial_t *obj)
@@ -524,13 +537,6 @@ uint8_t serial_rx_active(serial_t *obj)
     return (((HAL_UART_GetState(huart) & HAL_UART_STATE_BUSY_RX) == HAL_UART_STATE_BUSY_RX) ? 1 : 0);
 }
 
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
-{
-    if (__HAL_UART_GET_FLAG(huart, UART_FLAG_TC) != RESET) {
-        __HAL_UART_CLEAR_IT(huart, UART_CLEAR_TCF);
-    }
-}
-
 void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
 {
     if (__HAL_UART_GET_FLAG(huart, UART_FLAG_PE) != RESET) {
@@ -638,9 +644,6 @@ void serial_tx_abort_asynch(serial_t *obj)
 
     __HAL_UART_DISABLE_IT(huart, UART_IT_TC);
     __HAL_UART_DISABLE_IT(huart, UART_IT_TXE);
-
-    // clear flags
-    __HAL_UART_CLEAR_IT(huart, UART_FLAG_TC);
 
     // reset states
     huart->TxXferCount = 0;

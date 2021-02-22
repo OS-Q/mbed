@@ -1,5 +1,5 @@
-# Use of this source code is governed by the MIT license.
-__license__ = "MIT"
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
 
 from collections import defaultdict
 import itertools
@@ -8,7 +8,7 @@ from bs4.element import (
     CharsetMetaAttributeValue,
     ContentMetaAttributeValue,
     HTMLAwareEntitySubstitution,
-    nonwhitespace_re
+    whitespace_re
     )
 
 __all__ = [
@@ -102,12 +102,6 @@ class TreeBuilder(object):
     def __init__(self):
         self.soup = None
 
-    def initialize_soup(self, soup):
-        """The BeautifulSoup object has been initialized and is now
-        being associated with the TreeBuilder.
-        """
-        self.soup = soup
-        
     def reset(self):
         pass
 
@@ -173,7 +167,7 @@ class TreeBuilder(object):
                     # values. Split it into a list.
                     value = attrs[attr]
                     if isinstance(value, basestring):
-                        values = nonwhitespace_re.findall(value)
+                        values = whitespace_re.split(value)
                     else:
                         # html5lib sometimes calls setAttributes twice
                         # for the same tag when rearranging the parse

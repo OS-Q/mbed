@@ -21,18 +21,20 @@
  * Based on mbed-stress-test by Marcus Chang @ Arm Mbed - http://github.com/ARMmbed/mbed-stress-test
 */
 
+#if !INTEGRATION_TESTS
+#error [NOT_SUPPORTED] integration tests not enabled for this target
+#elif !MBED_CONF_RTOS_PRESENT
+#error [NOT_SUPPORTED] integration tests require RTOS
+#else
+
 #include "mbed.h"
 #include "FATFileSystem.h"
 #include "LittleFileSystem.h"
 #include "utest/utest.h"
 #include "unity/unity.h"
 #include "greentea-client/test_env.h"
-#include "common_defines_test.h"
+#include "common_defines_fs_test.h"
 #include "file_test.h"
-
-#if !INTEGRATION_TESTS
-#error [NOT_SUPPORTED] integration tests not enabled for this target
-#endif
 
 #ifdef MBED_CONF_APP_BASICS_TEST_FILENAME
 #include MBED_CONF_APP_BASICS_TEST_FILENAME
@@ -48,11 +50,9 @@ using namespace utest::v1;
 
 #if !defined(MBED_CONF_APP_NO_LED)
 DigitalOut led1(LED1);
-DigitalOut led2(LED2);
 void led_thread()
 {
     led1 = !led1;
-    led2 = !led1;
 }
 #endif
 
@@ -162,3 +162,4 @@ int main()
 
     return !Harness::run(specification);
 }
+#endif // !INTEGRATION_TESTS

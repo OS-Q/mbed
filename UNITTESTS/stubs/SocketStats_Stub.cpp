@@ -1,5 +1,6 @@
 /* mbed Microcontroller Library
  * Copyright (c) 2018 ARM Limited
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +15,13 @@
  * limitations under the License.
  */
 
-#include "SocketStats.h"
+#include "netsocket/SocketStats.h"
 
 #if MBED_CONF_NSAPI_SOCKET_STATS_ENABLED
 int SocketStats::get_entry_position(const Socket *const reference_id)
 {
     return 0;
 }
-#endif
 
 size_t SocketStats::mbed_stats_socket_get_each(mbed_stats_socket_t *stats, size_t count)
 {
@@ -61,3 +61,4 @@ void SocketStats::stats_update_recv_bytes(const Socket *const reference_id, size
 {
     return;
 }
+#endif

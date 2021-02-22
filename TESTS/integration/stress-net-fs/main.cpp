@@ -21,20 +21,24 @@
  * Based on mbed-stress-test by Marcus Chang @ Arm Mbed - http://github.com/ARMmbed/mbed-stress-test
 */
 
+#if !INTEGRATION_TESTS
+#error [NOT_SUPPORTED] integration tests not enabled for this target
+#elif !MBED_CONF_RTOS_PRESENT
+#error [NOT_SUPPORTED] integration tests require RTOS
+#else
+
 #include "mbed.h"
 #include "FATFileSystem.h"
 #include "LittleFileSystem.h"
 #include "utest/utest.h"
 #include "unity/unity.h"
 #include "greentea-client/test_env.h"
-#include "common_defines_test.h"
+#include "common_defines_fs_test.h"
+#include "common_defines_net_test.h"
 #include "download_test.h"
 #include "file_test.h"
 #include <string>
 
-#if !INTEGRATION_TESTS
-#error [NOT_SUPPORTED] integration tests not enabled for this target
-#endif
 
 #ifdef MBED_CONF_APP_BASICS_TEST_FILENAME
 #include MBED_CONF_APP_BASICS_TEST_FILENAME
@@ -50,11 +54,9 @@ using namespace utest::v1;
 
 #if !defined(MBED_CONF_APP_NO_LED)
 DigitalOut led1(LED1);
-DigitalOut led2(LED2);
 void led_thread()
 {
     led1 = !led1;
-    led2 = !led1;
 }
 #endif
 
@@ -72,12 +74,11 @@ static control_t setup_network(const size_t call_count)
         if (err == NSAPI_ERROR_OK) {
             break;
         } else {
-            printf("[ERROR] Connecting to network. Retrying %d of %d...\r\n", tries, MAX_RETRIES);
+            tr_error("[ERROR] Connecting to network. Retrying %d of %d...", tries, MAX_RETRIES);
         }
     }
     TEST_ASSERT_EQUAL(NSAPI_ERROR_OK, err);
-    printf("[NET] IP address is '%s'\n", interface->get_ip_address());
-    printf("[NET] MAC address is '%s'\n", interface->get_mac_address());
+
     return CaseNext;
 }
 
@@ -111,7 +112,7 @@ void file_fn(size_t buffer)
 {
     uint32_t thread_id = core_util_atomic_incr_u32(&thread_counter, 1);
     char filename[255] = { 0 };
-    snprintf(filename, 255, "mbed-file-test-%d.txt", thread_id);
+    snprintf(filename, 255, "mbed-file-test-%" PRIu32 ".txt", thread_id);
     file_test_write(filename, 0, story, sizeof(story), buffer);
     file_test_read(filename, 0, story, sizeof(story), buffer);
 }
@@ -152,7 +153,7 @@ static control_t stress_2_threads(const size_t call_count)
     Thread t1;
     Thread t2;
     t1.start(file_1kb_fn);
-    wait(1);
+    ThisThread::sleep_for(1);
     t2.start(download_fn);
     t2.join();
     t1.join();
@@ -169,29 +170,8 @@ static control_t stress_3_threads(const size_t call_count)
     Thread t3;
     t1.start(file_256b_fn);
     t2.start(file_1kb_fn);
-    wait(1);
+    ThisThread::sleep_for(1);
     t3.start(download_fn);
-    t3.join();
-    t2.join();
-    t1.join();
-
-    return CaseNext;
-}
-
-static control_t stress_4_threads(const size_t call_count)
-{
-    thread_counter = 0;
-
-    Thread t1;
-    Thread t2;
-    Thread t3;
-    Thread t4;
-    t1.start(file_256b_fn);
-    t2.start(file_256b_fn);
-    t3.start(file_256b_fn);
-    wait(1);
-    t4.start(download_fn);
-    t4.join();
     t3.join();
     t2.join();
     t1.join();
@@ -205,7 +185,7 @@ void test_malloc()
 
     void *bufferTest = NULL;
     TEST_ASSERT_MESSAGE(size > 0, "Size must not be zero for test");
-    printf("Allocating %d bytes", (int)size);
+    tr_info("Allocating %d bytes", (int)size);
     bufferTest = malloc(size);
     TEST_ASSERT(bufferTest != NULL);
     free(bufferTest);
@@ -243,3 +223,4 @@ int main()
 
     return !Harness::run(specification);
 }
+#endif // !INTEGRATION_TESTS

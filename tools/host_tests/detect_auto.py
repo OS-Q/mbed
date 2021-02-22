@@ -1,6 +1,7 @@
 """
 mbed SDK
 Copyright (c) 2011-2013 ARM Limited
+SPDX-License-Identifier: Apache-2.0
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,7 +18,7 @@ limitations under the License.
 
 import re
 
-class DetectPlatformTest():
+class DetectPlatformTest(object):
     PATTERN_MICRO_NAME = "Target '(\w+)'"
     re_detect_micro_name = re.compile(PATTERN_MICRO_NAME)
 

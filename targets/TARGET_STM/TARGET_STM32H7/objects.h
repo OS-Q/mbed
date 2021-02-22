@@ -1,32 +1,18 @@
 /* mbed Microcontroller Library
- *******************************************************************************
- * Copyright (c) 2016, STMicroelectronics
+ * SPDX-License-Identifier: BSD-3-Clause
+ ******************************************************************************
+ *
+ * Copyright (c) 2015-2020 STMicroelectronics.
  * All rights reserved.
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
  *
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 3. Neither the name of STMicroelectronics nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
- * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
- * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
- * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *******************************************************************************
+ ******************************************************************************
  */
+
 #ifndef MBED_OBJECTS_H
 #define MBED_OBJECTS_H
 
@@ -37,6 +23,12 @@
 #include "stm32h7xx_ll_usart.h"
 #include "stm32h7xx_ll_rtc.h"
 #include "stm32h7xx_ll_tim.h"
+#include "stm32h7xx_ll_rcc.h"
+#if defined(DUAL_CORE)
+#include "stm32h7xx_ll_hsem.h"
+#include "stm32h7xx_ll_cortex.h"
+#endif /* CONFIG_STM32H7_DUAL_CORE */
+#include "stm32h7xx_ll_pwr.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -140,7 +132,44 @@ struct analogin_s {
     uint8_t differential;
 };
 
+#if DEVICE_QSPI
+struct qspi_s {
+    QSPI_HandleTypeDef handle;
+    QSPIName qspi;
+    PinName io0;
+    PinName io1;
+    PinName io2;
+    PinName io3;
+    PinName sclk;
+    PinName ssel;
+};
+#endif
+
 #define GPIO_IP_WITHOUT_BRR
+
+#if defined(DUAL_CORE)
+/* HW semaphore Complement ID list defined in hw_conf.h from STM32WB */
+/* Index of the semaphore used to manage the entry Stop Mode procedure */
+#define CFG_HW_STOP_MODE_SEMID                                  4
+#define CFG_HW_STOP_MODE_MASK_SEMID                            (1 << CFG_HW_STOP_MODE_SEMID)
+
+/* Index of the semaphore used to access the RCC */
+#define CFG_HW_RCC_SEMID                                        3
+
+/* Index of the semaphore used to access the FLASH */
+#define CFG_HW_FLASH_SEMID                                      2
+
+/* Index of the semaphore used to access the PKA */
+#define CFG_HW_PKA_SEMID                                        1
+
+/* Index of the semaphore used to access the RNG */
+#define CFG_HW_RNG_SEMID                                        0
+
+/* Index of the semaphore used to access GPIO */
+#define CFG_HW_GPIO_SEMID                                       5
+
+#define HSEM_TIMEOUT   0xFFFF
+#endif /* DUAL_CORE */
 #include "gpio_object.h"
 
 struct dac_s {
@@ -162,6 +191,8 @@ struct can_s {
     int hz;
 };
 #endif
+
+#define HAL_CRC_IS_SUPPORTED(polynomial, width) ((width) == 7 || (width) == 8 || (width) == 16 || (width) == 32)
 
 /* rtc_api.c */
 #define __HAL_RCC_PWR_CLK_ENABLE()

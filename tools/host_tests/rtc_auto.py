@@ -1,6 +1,7 @@
 """
 mbed SDK
 Copyright (c) 2011-2013 ARM Limited
+SPDX-License-Identifier: Apache-2.0
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,7 +19,7 @@ limitations under the License.
 import re
 from time import time, strftime, gmtime
 
-class RTCTest():
+class RTCTest(object):
     PATTERN_RTC_VALUE = "\[(\d+)\] \[(\d+-\d+-\d+ \d+:\d+:\d+ [AaPpMm]{2})\]"
     re_detect_rtc_value = re.compile(PATTERN_RTC_VALUE)
 

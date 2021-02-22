@@ -1,6 +1,7 @@
 """
 mbed SDK
 Copyright (c) 2011-2013 ARM Limited
+SPDX-License-Identifier: Apache-2.0
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,7 +21,7 @@ import uuid
 import time
 from sys import stdout
 
-class WFITest():
+class WFITest(object):
 
     def test(self, selftest):
         c = selftest.mbed.serial_readline()

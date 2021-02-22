@@ -1,5 +1,6 @@
 /* mbed Microcontroller Library
- * Copyright (c) 2006-2013 ARM Limited
+ * Copyright (c) 2006-2020 ARM Limited
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,11 +39,15 @@ static USART_Type *const uart_addrs[] = USART_BASE_PTRS;
 int stdio_uart_inited = 0;
 serial_t stdio_uart;
 
-void serial_init(serial_t *obj, PinName tx, PinName rx)
+#if STATIC_PINMAP_READY
+#define SERIAL_INIT_DIRECT serial_init_direct
+void serial_init_direct(serial_t *obj, const serial_pinmap_t *pinmap)
+#else
+#define SERIAL_INIT_DIRECT _serial_init_direct
+static void _serial_init_direct(serial_t *obj, const serial_pinmap_t *pinmap)
+#endif
 {
-    uint32_t uart_tx = pinmap_peripheral(tx, PinMap_UART_TX);
-    uint32_t uart_rx = pinmap_peripheral(rx, PinMap_UART_RX);
-    obj->index = pinmap_merge(uart_tx, uart_rx);
+    obj->index = (uint32_t)pinmap->peripheral;
     MBED_ASSERT((int)obj->index != NC);
 
     usart_config_t config;
@@ -101,20 +106,35 @@ void serial_init(serial_t *obj, PinName tx, PinName rx)
 
     USART_Init(uart_addrs[obj->index], &config, 12000000);
 
-    pinmap_pinout(tx, PinMap_UART_TX);
-    pinmap_pinout(rx, PinMap_UART_RX);
+    pin_function(pinmap->tx_pin, pinmap->tx_function);
+    pin_function(pinmap->rx_pin, pinmap->rx_function);
 
-    if (tx != NC) {
-        pin_mode(tx, PullUp);
+    if (pinmap->tx_pin != NC) {
+        pin_mode(pinmap->tx_pin, PullUp);
     }
-    if (rx != NC) {
-        pin_mode(rx, PullUp);
+    if (pinmap->rx_pin != NC) {
+        pin_mode(pinmap->rx_pin, PullUp);
     }
 
     if (obj->index == STDIO_UART) {
         stdio_uart_inited = 1;
         memcpy(&stdio_uart, obj, sizeof(serial_t));
     }
+}
+
+void serial_init(serial_t *obj, PinName tx, PinName rx)
+{
+    uint32_t uart_tx = pinmap_peripheral(tx, PinMap_UART_TX);
+    uint32_t uart_rx = pinmap_peripheral(rx, PinMap_UART_RX);
+
+    int peripheral = (int)pinmap_merge(uart_tx, uart_rx);
+
+    int tx_function = (int)pinmap_find_function(tx, PinMap_UART_TX);
+    int rx_function = (int)pinmap_find_function(rx, PinMap_UART_RX);
+
+    const serial_pinmap_t explicit_uart_pinmap = {peripheral, tx, tx_function, rx, rx_function, false};
+
+    SERIAL_INIT_DIRECT(obj, &explicit_uart_pinmap);
 }
 
 void serial_free(serial_t *obj)
@@ -170,10 +190,10 @@ void serial_format(serial_t *obj, int data_bits, SerialParity parity, int stop_b
 static inline void uart_irq(uint32_t transmit_empty, uint32_t receive_not_empty, uint32_t index)
 {
     if (serial_irq_ids[index] != 0) {
-        if (transmit_empty)
+        if (transmit_empty && (uart_addrs[index]->FIFOINTENSET & kUSART_TxLevelInterruptEnable))
             irq_handler(serial_irq_ids[index], TxIrq);
 
-        if (receive_not_empty)
+        if (receive_not_empty && (uart_addrs[index]->FIFOINTENSET & kUSART_RxLevelInterruptEnable))
             irq_handler(serial_irq_ids[index], RxIrq);
     }
 }
@@ -386,35 +406,49 @@ void serial_break_clear(serial_t *obj)
 /*
  * Only hardware flow control is implemented in this API.
  */
-void serial_set_flow_control(serial_t *obj, FlowControl type, PinName rxflow, PinName txflow)
+#if STATIC_PINMAP_READY
+#define SERIAL_SET_FC_DIRECT serial_set_flow_control_direct
+void serial_set_flow_control_direct(serial_t *obj, FlowControl type, const serial_fc_pinmap_t *pinmap)
+#else
+#define SERIAL_SET_FC_DIRECT _serial_set_flow_control_direct
+static void _serial_set_flow_control_direct(serial_t *obj, FlowControl type, const serial_fc_pinmap_t *pinmap)
+#endif
 {
     gpio_t gpio;
 
     switch(type) {
         case FlowControlRTS:
-            pinmap_pinout(rxflow, PinMap_UART_RTS);
+            pin_function(pinmap->rx_flow_pin, pinmap->rx_flow_function);
+            pin_mode(pinmap->rx_flow_pin, PullNone);
             uart_addrs[obj->index]->CFG &= ~USART_CFG_CTSEN_MASK;
             break;
 
         case FlowControlCTS:
             /* Do not use RTS, configure pin to GPIO input */
-            gpio_init(&gpio, rxflow);
-            gpio_dir(&gpio, PIN_INPUT);
+            if (pinmap->rx_flow_pin != NC) {
+                gpio_init(&gpio, pinmap->rx_flow_pin);
+                gpio_dir(&gpio, PIN_INPUT);
+            }
 
-            pinmap_pinout(txflow, PinMap_UART_CTS);
+            pin_function(pinmap->tx_flow_pin, pinmap->tx_flow_function);
+            pin_mode(pinmap->tx_flow_pin, PullNone);
             uart_addrs[obj->index]->CFG |= USART_CFG_CTSEN_MASK;
             break;
 
         case FlowControlRTSCTS:
-            pinmap_pinout(rxflow, PinMap_UART_RTS);
-            pinmap_pinout(txflow, PinMap_UART_CTS);
+            pin_function(pinmap->rx_flow_pin, pinmap->rx_flow_function);
+            pin_mode(pinmap->rx_flow_pin, PullNone);
+            pin_function(pinmap->tx_flow_pin, pinmap->tx_flow_function);
+            pin_mode(pinmap->tx_flow_pin, PullNone);
             uart_addrs[obj->index]->CFG |= USART_CFG_CTSEN_MASK;
             break;
 
         case FlowControlNone:
             /* Do not use RTS, configure pin to GPIO input */
-            gpio_init(&gpio, rxflow);
-            gpio_dir(&gpio, PIN_INPUT);
+            if (pinmap->rx_flow_pin != NC) {
+                gpio_init(&gpio, pinmap->rx_flow_pin);
+                gpio_dir(&gpio, PIN_INPUT);
+            }
 
             uart_addrs[obj->index]->CFG &= ~USART_CFG_CTSEN_MASK;
             break;
@@ -423,6 +457,17 @@ void serial_set_flow_control(serial_t *obj, FlowControl type, PinName rxflow, Pi
             break;
     }
 }
+
+void serial_set_flow_control(serial_t *obj, FlowControl type, PinName rxflow, PinName txflow)
+{
+    int tx_flow_function = (int)pinmap_find_function(txflow, PinMap_UART_CTS);
+    int rx_flow_function = (int)pinmap_find_function(rxflow, PinMap_UART_RTS);
+
+    const serial_fc_pinmap_t explicit_uart_fc_pinmap = {0, txflow, tx_flow_function, rxflow, rx_flow_function};
+
+    SERIAL_SET_FC_DIRECT(obj, type, &explicit_uart_fc_pinmap);
+}
+
 #endif
 const PinMap *serial_tx_pinmap()
 {

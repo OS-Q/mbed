@@ -36,10 +36,19 @@
 #include "PinNames.h"
 #include "stm32l1xx_ll_usart.h"
 #include "stm32l1xx_ll_tim.h"
+#include "stm32l1xx_ll_pwr.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+
+// temporary workaround
+#define HAL_I2C_Master_Seq_Receive_IT  HAL_I2C_Master_Sequential_Receive_IT
+#define HAL_I2C_Master_Seq_Transmit_IT HAL_I2C_Master_Sequential_Transmit_IT
+#define HAL_I2C_Slave_Seq_Receive_IT   HAL_I2C_Slave_Sequential_Receive_IT
+#define HAL_I2C_Slave_Seq_Transmit_IT  HAL_I2C_Slave_Sequential_Transmit_IT
+
 
 struct pwmout_s {
     PWMName pwm;

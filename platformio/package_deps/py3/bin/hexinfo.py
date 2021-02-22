@@ -1,4 +1,4 @@
-#!C:\Python37\python.exe
+#!E:\Projects\platformio-core\.tox\py39\Scripts\python.exe
 
 # Copyright (c) 2015 Andrew Fernandes <andrew@fernandes.org>
 # All rights reserved.
@@ -38,7 +38,7 @@
         data (if any), in YAML format.
 """
 
-VERSION = '2.2'
+VERSION = '2.3.0'
 
 USAGE = '''hexinfo: summarize a hex file's contents.
 Usage:

@@ -1,6 +1,7 @@
 """
 mbed SDK
 Copyright (c) 2011-2013 ARM Limited
+SPDX-License-Identifier: Apache-2.0
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,7 +19,7 @@ from __future__ import print_function
 
 from sys import stdout
 
-class DefaultAuto():
+class DefaultAuto(object):
     """ Simple, basic host test's test runner waiting for serial port
         output from MUT, no supervision over test running in MUT is executed.
     """

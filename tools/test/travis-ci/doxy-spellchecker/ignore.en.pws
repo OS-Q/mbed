@@ -88,6 +88,7 @@ emacs
 json
 noncopyable
 sendto
+gethostbyname
 multicast
 multicasts
 singleshot
@@ -110,4 +111,13 @@ pppd
 pppdebug
 ppp
 api
+uart
+chrono
+Hinnant
+Vin
+Vref
+ssid
+instantiation
+instantiations
+KVStore
 _doxy_

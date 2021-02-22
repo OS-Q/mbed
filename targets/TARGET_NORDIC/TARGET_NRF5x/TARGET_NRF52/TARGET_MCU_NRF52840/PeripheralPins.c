@@ -37,33 +37,7 @@
  */
 
 #include "PeripheralPins.h"
-
-typedef enum {
-    NRF_SAADC_CHANNEL_0 = 0,
-    NRF_SAADC_CHANNEL_1 = 1,
-    NRF_SAADC_CHANNEL_2 = 2,
-    NRF_SAADC_CHANNEL_3 = 3,
-    NRF_SAADC_CHANNEL_4 = 4,
-    NRF_SAADC_CHANNEL_5 = 5,
-    NRF_SAADC_CHANNEL_6 = 6,
-    NRF_SAADC_CHANNEL_7 = 7,
-} nrf_saadc_channel_t;
-
-/************ADC***************/
-/* The third "function" value is used to select the correct ADC channel */
-#if DEVICE_ANALOGIN
-const PinMap PinMap_ADC[] = {
-    { p2,  ADC0_0, NRF_SAADC_CHANNEL_0 },
-    { p3,  ADC0_0, NRF_SAADC_CHANNEL_1 },
-    { p4,  ADC0_0, NRF_SAADC_CHANNEL_2 },
-    { p5,  ADC0_0, NRF_SAADC_CHANNEL_3 },
-    { p28, ADC0_0, NRF_SAADC_CHANNEL_4 },
-    { p29, ADC0_0, NRF_SAADC_CHANNEL_5 },
-    { p30, ADC0_0, NRF_SAADC_CHANNEL_6 },
-    { p31, ADC0_0, NRF_SAADC_CHANNEL_7 },
-    { NC,  NC,     NC                  }
-};
-#endif
+#include "PeripheralPinMaps.h"
 
 // Pinmap used for testing only
 const PinMap PinMap_I2C_testing[] = {
@@ -329,3 +303,14 @@ const PinMap PinMap_QSPI_testing[] = {
 
     {NC, NC, 0}
 };
+
+/* On NRF we have just dummy pin-maps for testing (no peripherals are specified).
+   Disable restriction for STDIO uart peripheral. */
+const PeripheralList *pinmap_uart_restricted_peripherals()
+{
+    static const PeripheralList peripheral_list = {
+        0,
+        0
+    };
+    return &peripheral_list;
+}

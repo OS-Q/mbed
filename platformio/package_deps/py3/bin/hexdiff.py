@@ -1,4 +1,4 @@
-#!C:\Python37\python.exe
+#!E:\Projects\platformio-core\.tox\py39\Scripts\python.exe
 
 # Copyright (c) 2011-2018 Alexander Belchenko
 # All rights reserved.
@@ -37,7 +37,7 @@
 of compared data.
 """
 
-VERSION = '2.2'
+VERSION = '2.3.0'
 
 USAGE = '''hexdiff: diff dumps of 2 hex files.
 Usage:

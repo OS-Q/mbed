@@ -15,14 +15,19 @@
  * limitations under the License.
  */
 
-#include "NetworkStack.h"
-#include "nsapi_dns.h"
+#include "netsocket/NetworkStack.h"
+#include "netsocket/nsapi_dns.h"
 #include "mbed.h"
 #include "stddef.h"
 #include <new>
 
 // Default NetworkStack operations
 nsapi_error_t NetworkStack::gethostbyname(const char *name, SocketAddress *address, nsapi_version_t version, const char *interface_name)
+{
+    return NSAPI_ERROR_OK;
+}
+
+nsapi_value_or_error_t NetworkStack::getaddrinfo(const char *hostname, SocketAddress *hints, SocketAddress **res, const char *interface_name)
 {
     return NSAPI_ERROR_OK;
 }
@@ -60,16 +65,16 @@ nsapi_error_t NetworkStack::getsockopt(void *handle, int level, int optname, voi
 // Conversion function for network stacks
 NetworkStack *nsapi_create_stack(nsapi_stack_t *stack)
 {
-    return NULL;
-}
-
-NetworkStack *nsapi_create_stack(NetworkStack *stack)
-{
-    return NULL;
+    return nullptr;
 }
 
 nsapi_value_or_error_t NetworkStack::gethostbyname_async(const char *host, hostbyname_cb_t callback, nsapi_version_t version,
                                                          const char *interface_name)
+{
+    return NSAPI_ERROR_UNSUPPORTED;
+}
+
+nsapi_value_or_error_t NetworkStack::getaddrinfo_async(const char *hostname, SocketAddress *hints, hostbyname_cb_t callback, const char *interface_name)
 {
     return NSAPI_ERROR_UNSUPPORTED;
 }
@@ -89,11 +94,17 @@ nsapi_error_t NetworkStack::call_in(int delay, mbed::Callback<void()> func)
     return NSAPI_ERROR_UNSUPPORTED;
 }
 
-const char *NetworkStack::get_ip_address()
+nsapi_error_t NetworkStack::get_ip_address(SocketAddress* address)
 {
-    return NULL;
+    return NSAPI_ERROR_UNSUPPORTED;
 }
-const char *NetworkStack::get_ip_address_if(const char *interface_name)
+
+nsapi_error_t NetworkStack::get_ipv6_link_local_address(SocketAddress *address)
 {
-    return NULL;
+    return NSAPI_ERROR_UNSUPPORTED;
+}
+
+nsapi_error_t NetworkStack::get_ip_address_if(SocketAddress* address, const char *interface_name)
+{
+    return NSAPI_ERROR_UNSUPPORTED;
 }

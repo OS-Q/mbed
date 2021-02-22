@@ -23,7 +23,6 @@
 #include <mstd_memory>
 #include <mstd_type_traits>
 #include <mstd_utility>
-#include "platform/mbed_assert.h"
 #include "platform/mbed_atomic.h"
 #include "platform/mbed_critical.h"
 #include "platform/CriticalSectionLock.h"
@@ -477,7 +476,7 @@ protected:
  */
 template<typename T, typename A = atomic_container_t<T>>
 struct AtomicBaseInt {
-    MBED_STRUCT_STATIC_ASSERT(sizeof(T) == sizeof(A), "AtomicBaseInt size mismatch");
+    static_assert(sizeof(T) == sizeof(A), "AtomicBaseInt size mismatch");
     using value_type = T;
     AtomicBaseInt() noexcept = default;
     constexpr AtomicBaseInt(T v) noexcept : u(A(v))
@@ -576,14 +575,8 @@ protected:
 template<typename T, typename DiffT = T, typename StrideT = char, typename A = atomic_container_t<T>>
 struct AtomicWithAdd : public AtomicBaseInt<T, A> {
     using difference_type = DiffT;
-#ifdef __CC_ARM
-    AtomicWithAdd() noexcept = default;
-    constexpr AtomicWithAdd(T v) noexcept : AtomicBaseInt<T, A>(v)
-    {
-    }
-#else
     using AtomicBaseInt<T, A>::AtomicBaseInt;
-#endif
+
     T operator++() volatile noexcept
     {
         A d = static_cast<A>(sizeof(StrideT));
@@ -640,14 +633,8 @@ struct AtomicWithAdd : public AtomicBaseInt<T, A> {
  */
 template<typename T, typename A = atomic_container_t<T>>
 struct AtomicWithBitwise : public AtomicWithAdd<T, A> {
-#ifdef __CC_ARM
-    AtomicWithBitwise() noexcept = default;
-    constexpr AtomicWithBitwise(T v) noexcept : AtomicWithAdd<T, A>(v)
-    {
-    }
-#else
     using AtomicWithAdd<T, A>::AtomicWithAdd;
-#endif
+
     T fetch_and(T arg) volatile noexcept
     {
         A d = static_cast<A>(arg);

@@ -50,7 +50,7 @@ void pwmout_write(pwmout_t *obj, float percent)
 
 float pwmout_read(pwmout_t *obj)
 {
-    return 100.0f * obj->width_us / obj->period_us;
+    return ((float)(obj->width_us) / obj->period_us);
 }
 
 void pwmout_period(pwmout_t *obj, float seconds)
@@ -74,6 +74,11 @@ void pwmout_period_us(pwmout_t *obj, int us)
     }
 }
 
+int pwmout_read_period_us(pwmout_t *obj)
+{
+    return obj->period_us;
+}
+
 void pwmout_pulsewidth(pwmout_t *obj, float seconds)
 {
     pwmout_pulsewidth_us(obj, (int)(seconds * CY_US_PER_SECOND));
@@ -90,6 +95,11 @@ void pwmout_pulsewidth_us(pwmout_t *obj, int us)
     if (CY_RSLT_SUCCESS != cyhal_pwm_set_period(&(obj->hal_pwm), obj->period_us, obj->width_us)) {
         MBED_ERROR(MBED_MAKE_ERROR(MBED_MODULE_DRIVER_PWM, MBED_ERROR_CODE_FAILED_OPERATION), "cyhal_pwm_set_period");
     }
+}
+
+int pwmout_read_pulsewidth_us(pwmout_t *obj)
+{
+    return obj->width_us;
 }
 
 const PinMap *pwmout_pinmap(void)

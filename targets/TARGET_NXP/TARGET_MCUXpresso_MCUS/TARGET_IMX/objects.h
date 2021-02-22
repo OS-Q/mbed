@@ -1,5 +1,6 @@
 /* mbed Microcontroller Library
  * Copyright (c) 2006-2013 ARM Limited
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +66,12 @@ struct dac_s {
 struct trng_s {
     uint8_t dummy;
 };
+
+#if DEVICE_FLASH
+struct flash_s {
+    uint8_t dummy;
+};
+#endif
 
 #include "gpio_object.h"
 

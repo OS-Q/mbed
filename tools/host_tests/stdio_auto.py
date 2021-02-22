@@ -1,6 +1,7 @@
 """
 mbed SDK
 Copyright (c) 2011-2013 ARM Limited
+SPDX-License-Identifier: Apache-2.0
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +20,7 @@ import re
 import random
 from time import time
 
-class StdioTest():
+class StdioTest(object):
     PATTERN_INT_VALUE = "Your value was: (-?\d+)"
     re_detect_int_value = re.compile(PATTERN_INT_VALUE)
 

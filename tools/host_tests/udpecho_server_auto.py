@@ -1,6 +1,7 @@
 """
 mbed SDK
 Copyright (c) 2011-2013 ARM Limited
+SPDX-License-Identifier: Apache-2.0
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,7 +23,7 @@ import uuid
 from sys import stdout
 from socket import socket, AF_INET, SOCK_DGRAM
 
-class UDPEchoServerTest():
+class UDPEchoServerTest(object):
     ECHO_SERVER_ADDRESS = ""
     ECHO_PORT = 0
     s = None # Socket

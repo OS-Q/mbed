@@ -79,8 +79,8 @@ class PlatformioMbedAdapter(object):
     def get_target_config(self):
         target_info = TARGET_MAP.get(self.target, "")
         if not target_info:
-            sys.stderr.write(
-                "Failed to extract info for %s target\n", self.target)
+            sys.stderr.write("Failed to extract configuration for %s.\n" % self.target)
+            sys.stderr.write("It might not be supported in the this Mbed release.\n")
             sys.exit(1)
 
         return target_info
@@ -192,6 +192,7 @@ class PlatformioMbedAdapter(object):
         #     if not exists(src_path):
         #         error_msg = "The library src folder doesn't exist:%s", src_path
         #         raise Exception(error_msg)
+
 
         self.resources = MbedResourcesFixedPath(self.framework_path, self.notify).scan_with_toolchain(
             self.src_paths, self.toolchain, dependencies_paths,

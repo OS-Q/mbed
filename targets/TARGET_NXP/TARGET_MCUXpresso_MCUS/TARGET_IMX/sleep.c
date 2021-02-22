@@ -1,5 +1,6 @@
 /* mbed Microcontroller Library
  * Copyright (c) 2006-2013 ARM Limited
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +24,9 @@ extern bool serial_check_tx_ongoing();
 
 void hal_sleep(void)
 {
-    vPortPRE_SLEEP_PROCESSING(kCLOCK_ModeWait);
-
     __DSB();
     __WFI();
     __ISB();
-
-    vPortPOST_SLEEP_PROCESSING(kCLOCK_ModeWait);
 }
 
 void hal_deepsleep(void)

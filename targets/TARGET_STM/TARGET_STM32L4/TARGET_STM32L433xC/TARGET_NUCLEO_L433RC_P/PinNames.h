@@ -165,8 +165,8 @@ typedef enum {
     A3          = PC_2,
     A4          = PC_1,
     A5          = PC_0,
-    D0          = PA_2,
-    D1          = PA_3,
+    D0          = PA_10,
+    D1          = PA_9,
     D2          = PA_12,
     D3          = PB_3,
     D4          = PB_5,
@@ -216,8 +216,8 @@ typedef enum {
     /**** USB pins ****/
     USB_DM = PA_11,
     USB_DP = PA_12,
-    USB_NOE = PC_9,
-    USB_NOE_ALT0 = PA_13,
+    USB_NOE = PA_13,
+    USB_NOE_ALT0 = PC_9,
 
     /**** OSCILLATOR pins ****/
     RCC_OSC32_IN = PC_14,

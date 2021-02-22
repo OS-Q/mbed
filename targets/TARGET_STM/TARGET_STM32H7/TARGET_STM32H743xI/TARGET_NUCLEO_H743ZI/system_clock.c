@@ -1,18 +1,17 @@
 /* mbed Microcontroller Library
-* Copyright (c) 2006-2017 ARM Limited
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * SPDX-License-Identifier: BSD-3-Clause
+ ******************************************************************************
+ *
+ * Copyright (c) 2015-2020 STMicroelectronics.
+ * All rights reserved.
+ *
+ * This software component is licensed by ST under BSD 3-Clause license,
+ * the "License"; You may not use this file except in compliance with the
+ * License. You may obtain a copy of the License at:
+ *                        opensource.org/licenses/BSD-3-Clause
+ *
+ ******************************************************************************
+ */
 
 /**
   * This file configures the system clock as follows:
@@ -32,14 +31,7 @@
 **/
 
 #include "stm32h7xx.h"
-#include "nvic_addr.h"
 #include "mbed_error.h"
-
-/*!< Uncomment the following line if you need to relocate your vector Table in
-     Internal SRAM. */
-/* #define VECT_TAB_SRAM */
-#define VECT_TAB_OFFSET  0x00 /*!< Vector Table base offset field. 
-                                   This value must be a multiple of 0x200. */
 
 // clock source is selected with CLOCK_SOURCE in json config
 #define USE_PLL_HSE_EXTC     0x8  // Use external clock (ST Link MCO)
@@ -86,22 +78,21 @@ void SetSysClock(void)
     }
 }
 
+
 #if ( ((CLOCK_SOURCE) & USE_PLL_HSE_XTAL) || ((CLOCK_SOURCE) & USE_PLL_HSE_EXTC) )
 /******************************************************************************/
 /*            PLL (clocked by HSE) used as System clock source                */
 /******************************************************************************/
-uint8_t SetSysClock_PLL_HSE(uint8_t bypass)
+MBED_WEAK uint8_t SetSysClock_PLL_HSE(uint8_t bypass)
 {
     RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
     RCC_OscInitTypeDef RCC_OscInitStruct = {0};
     RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
 
-    /* Supply configuration update enable */
-    HAL_PWREx_ConfigSupply(PWR_LDO_SUPPLY);
     /* Configure the main internal regulator output voltage */
     __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
-    while(!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY)) {}
+    while (!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY)) {}
 
     /* Enable HSE Oscillator and activate PLL with HSE as source */
     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE | RCC_OSCILLATORTYPE_HSI48;
@@ -113,8 +104,12 @@ uint8_t SetSysClock_PLL_HSE(uint8_t bypass)
     RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
     RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
     RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+#if HSE_VALUE==8000000
     RCC_OscInitStruct.PLL.PLLM = 4;   // 2 MHz
     RCC_OscInitStruct.PLL.PLLN = 400; // 800 MHz
+#else
+#error Unsupported externall clock value, check HSE_VALUE define
+#endif
     RCC_OscInitStruct.PLL.PLLP = 2;   // PLLCLK = SYSCLK = 400 MHz
     RCC_OscInitStruct.PLL.PLLQ = 80;  // PLL1Q used for FDCAN = 10 MHz
     RCC_OscInitStruct.PLL.PLLR = 2;
@@ -136,16 +131,19 @@ uint8_t SetSysClock_PLL_HSE(uint8_t bypass)
     RCC_ClkInitStruct.APB2CLKDivider = RCC_APB2_DIV2;
     RCC_ClkInitStruct.APB3CLKDivider = RCC_APB3_DIV2;
     RCC_ClkInitStruct.APB4CLKDivider = RCC_APB4_DIV2;
-    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK) {
+    if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_4) != HAL_OK) {
         return 0; // FAIL
     }
 
-    PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART3 | RCC_PERIPHCLK_USB;
-    PeriphClkInitStruct.Usart234578ClockSelection = RCC_USART234578CLKSOURCE_D2PCLK1;
+#if DEVICE_USBDEVICE
+    PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USB;
     PeriphClkInitStruct.UsbClockSelection = RCC_USBCLKSOURCE_HSI48;
     if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK) {
         return 0; // FAIL
     }
+
+    HAL_PWREx_EnableUSBVoltageDetector();
+#endif /* DEVICE_USBDEVICE */
 
     return 1; // OK
 }
@@ -160,11 +158,7 @@ uint8_t SetSysClock_PLL_HSI(void)
     RCC_ClkInitTypeDef RCC_ClkInitStruct;
     RCC_OscInitTypeDef RCC_OscInitStruct;
 
-    /*!< Supply configuration update enable */
-    HAL_PWREx_ConfigSupply(PWR_LDO_SUPPLY);
-    /* The voltage scaling allows optimizing the power consumption when the device is
-    clocked below the maximum system frequency, to update the voltage scaling value
-    regarding system frequency refer to product datasheet.  */
+    /* Configure the main internal regulator output voltage */
     __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
     while (!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY)) {}
 
@@ -175,10 +169,10 @@ uint8_t SetSysClock_PLL_HSI(void)
     RCC_OscInitStruct.CSIState = RCC_CSI_OFF;
     RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
     RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
-    RCC_OscInitStruct.PLL.PLLM = 8;
-    RCC_OscInitStruct.PLL.PLLN = 100;
-    RCC_OscInitStruct.PLL.PLLP = 2;
-    RCC_OscInitStruct.PLL.PLLQ = 2;
+    RCC_OscInitStruct.PLL.PLLM = 8;    // 8 MHz
+    RCC_OscInitStruct.PLL.PLLN = 100;  // 800 MHz
+    RCC_OscInitStruct.PLL.PLLP = 2;    // 400 MHz
+    RCC_OscInitStruct.PLL.PLLQ = 80;   // PLL1Q used for FDCAN = 10 MHz
     RCC_OscInitStruct.PLL.PLLR = 2;
     RCC_OscInitStruct.PLL.PLLVCOSEL = RCC_PLL1VCOWIDE;
     RCC_OscInitStruct.PLL.PLLRGE = RCC_PLL1VCIRANGE_2;

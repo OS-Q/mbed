@@ -90,7 +90,7 @@ def check_device_has(dict):
             yield "%s is not allowed in device_has" % name
 
 MCU_REQUIRED_KEYS = ["release_versions", "supported_toolchains",
-                     "default_lib", "public", "inherits", "device_has"]
+                     "c_lib", "public", "inherits", "device_has"]
 MCU_ALLOWED_KEYS = ["device_has_add", "device_has_remove", "core",
                     "extra_labels", "features", "features_add",
                     "features_remove", "bootloader_supported", "device_name",
@@ -247,14 +247,14 @@ def subcommand(name, *args, **kwargs):
                  choices=TARGET_MAP.keys(), type=str.upper))
 def targets_cmd(mcus=[]):
     """Find and print errors about specific targets"""
-    print dump_all([check_hierarchy(TARGET_MAP[m]) for m in mcus],
-                   default_flow_style=False)
+    print(dump_all([check_hierarchy(TARGET_MAP[m]) for m in mcus],
+                   default_flow_style=False))
 
 @subcommand("all-targets")
 def all_targets_cmd():
     """Print all errors about all parts"""
-    print dump_all([check_hierarchy(m) for m in TARGET_MAP.values()],
-                   default_flow_style=False)
+    print(dump_all([check_hierarchy(m) for m in list(TARGET_MAP.values())],
+                   default_flow_style=False))
 
 @subcommand("orphans")
 def orphans_cmd():
@@ -265,7 +265,7 @@ def orphans_cmd():
             if name in orphans:
                 orphans.remove(name)
     if orphans:
-        print dump_all([orphans], default_flow_style=False)
+        print(dump_all([orphans], default_flow_style=False))
     return len(orphans)
 
 def main():

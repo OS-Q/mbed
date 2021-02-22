@@ -25,8 +25,8 @@ MBED_REPOSITORY = "https://github.com/ARMmbed/mbed-os.git"
 MBED_VERSION = "latest"
 
 PIO_PACKAGES_ROOT = join(expanduser("~"), ".platformio", "packages")
-PIO_MBED_PACKAGE_ROOT = join(PIO_PACKAGES_ROOT, "framework-N02")
-LATEST_MBED_PACKAGE_ROOT = join(PIO_PACKAGES_ROOT, "framework-N02")
+PIO_MBED_PACKAGE_ROOT = join(PIO_PACKAGES_ROOT, "framework-mbed")
+LATEST_MBED_PACKAGE_ROOT = join(PIO_PACKAGES_ROOT, "framework-mbed-latest")
 
 
 def exec_cmd(*args, **kwargs):

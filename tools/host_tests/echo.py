@@ -1,6 +1,7 @@
 """
 mbed SDK
 Copyright (c) 2011-2013 ARM Limited
+SPDX-License-Identifier: Apache-2.0
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +20,7 @@ import sys
 import uuid
 from sys import stdout
 
-class EchoTest():
+class EchoTest(object):
 
     # Test parameters
     TEST_SERIAL_BAUDRATE = 115200

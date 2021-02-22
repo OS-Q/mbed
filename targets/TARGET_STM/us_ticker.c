@@ -1,5 +1,6 @@
 /* mbed Microcontroller Library
  * Copyright (c) 2006-2018 ARM Limited
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,9 +43,6 @@ void us_ticker_irq_handler(void);
 // ************************************ 16-bit timer ************************************
 #if TIM_MST_BIT_WIDTH == 16
 
-extern uint32_t prev_time;
-extern uint32_t elapsed_time;
-
 #if defined(TARGET_STM32F0)
 void timer_update_irq_handler(void)
 {
@@ -75,8 +73,15 @@ void init_16bit_timer(void)
     TIM_MST_RCC;
 
     // Reset timer
+#if defined(DUAL_CORE)
+    while (LL_HSEM_1StepLock(HSEM, CFG_HW_RCC_SEMID)) {
+    }
+#endif /* DUAL_CORE */
     TIM_MST_RESET_ON;
     TIM_MST_RESET_OFF;
+#if defined(DUAL_CORE)
+    LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, HSEM_CR_COREID_CURRENT);
+#endif /* DUAL_CORE */
 
     // Update the SystemCoreClock variable
     SystemCoreClockUpdate();
@@ -121,10 +126,6 @@ void init_16bit_timer(void)
 #endif
 
     __HAL_TIM_DISABLE_IT(&TimMasterHandle, TIM_IT_CC1);
-
-    // Used by HAL_GetTick()
-    prev_time = 0;
-    elapsed_time = 0;
 }
 
 // ************************************ 32-bit timer ************************************
@@ -161,8 +162,15 @@ void init_32bit_timer(void)
     TIM_MST_RCC;
 
     // Reset timer
+#if defined(DUAL_CORE)
+    while (LL_HSEM_1StepLock(HSEM, CFG_HW_RCC_SEMID)) {
+    }
+#endif /* DUAL_CORE */
     TIM_MST_RESET_ON;
     TIM_MST_RESET_OFF;
+#if defined(DUAL_CORE)
+    LL_HSEM_ReleaseLock(HSEM, CFG_HW_RCC_SEMID, HSEM_CR_COREID_CURRENT);
+#endif /* DUAL_CORE */
 
     // Configure time base
     TimMasterHandle.Instance    = TIM_MST;

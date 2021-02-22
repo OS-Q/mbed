@@ -51,11 +51,25 @@ void rtc_init(void)
     RMU_ResetControl(rmuResetPin, rmuResetModeFull);
 
     /* Set up the RTCC and let it run, Forrest, run */
+
+    /* Save time if it has been set */
+    time_t t = 0;
+    if (RTCC->RET[1].REG == 0) {
+        t = rtc_read();
+    }
+
     RTCC_Reset();
     RTCC_Init_TypeDef rtcc_init = RTCC_INIT_DEFAULT;
     rtcc_init.presc = rtccCntPresc_32768;
     RTCC_Init(&rtcc_init);
     RTCC_Enable(true);
+
+    /* Update time */
+    if (RTCC->RET[1].REG == 0) {
+        rtc_write(t);
+    } else {
+        RTCC->RET[0].REG = 0;
+    }
 }
 
 void rtc_free(void)
@@ -71,20 +85,16 @@ int rtc_isenabled(void)
 
 time_t rtc_read(void)
 {
-    return RTCC_CounterGet();
+    return RTCC_CounterGet() + RTCC->RET[0].REG;
 }
 
 void rtc_write(time_t t)
 {
     core_util_critical_section_enter();
-    uint32_t diff = t - RTCC_CounterGet();
-    lptick_offset += diff;
-
-    if(RTCC_IntGetEnabled() & RTCC_IF_CC0) {
-        RTCC->CC[0].CCV += diff << 15;
-    }
-
-    RTCC_CounterSet(t);
+    RTCC->RET[0].REG = t - RTCC_CounterGet();
+    
+    /* Record that the time has been set */
+    RTCC->RET[1].REG = 0;
     core_util_critical_section_exit();
 }
 

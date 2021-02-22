@@ -1,5 +1,7 @@
-/* mbed Microcontroller Library
- * Copyright (c) 2017-2018 Nuvoton
+/*
+ * Copyright (c) 2017-2018, Nuvoton Technology Corporation
+ *
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +16,6 @@
  * limitations under the License.
  */
 
-
 #include "cmsis.h"
 #include "mbed_assert.h"
 #include "mbed_atomic.h"
@@ -27,7 +28,7 @@
 #include "platform/SingletonPtr.h"
 #include "platform/PlatformMutex.h"
 
-#if DEVICE_TRNG || defined(MBEDTLS_CONFIG_HW_SUPPORT)
+#if defined(MBEDTLS_CONFIG_HW_SUPPORT)
 
 /* Consideration for choosing proper synchronization mechanism
  *
@@ -345,4 +346,4 @@ extern "C" void CRPT_IRQHandler()
     }
 }
 
-#endif /* #if DEVICE_TRNG || defined(MBEDTLS_CONFIG_HW_SUPPORT) */
+#endif /* #if defined(MBEDTLS_CONFIG_HW_SUPPORT) */

@@ -1,5 +1,6 @@
 /* mbed Microcontroller Library
  * Copyright (c) 2006-2013 ARM Limited
+ * SPDX-License-Identifier: Apache-2.0
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +23,14 @@
 extern "C" {
 #endif
 
+/* If this macro is defined, then constexpr utility functions for pin-map seach can be used. */
+#define STATIC_PINMAP_READY 1
+
 typedef enum {
     PIN_INPUT,
     PIN_OUTPUT
 } PinDirection;
 
-#define DAC0_OUT 0xFEFE /* DAC does not have Pin Name in RM */
-#define NOT_CONNECTED (int)0xFFFFFFFF
 #define GPIO_PORT_SHIFT 12
 
 typedef enum {
@@ -193,7 +195,10 @@ typedef enum {
     PTE30 = (4 << GPIO_PORT_SHIFT | 30),
     PTE31 = (4 << GPIO_PORT_SHIFT | 31),
 
-       // Analog
+    DAC0_OUT = 0xFEFE, /* DAC does not have Pin Name in RM */
+    NOT_CONNECTED = (int)0xFFFFFFFF,
+
+    // Analog
     A0 = PTB6,
     A1 = PTB7,
     A2 = DAC0_OUT,
