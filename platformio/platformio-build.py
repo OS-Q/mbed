@@ -28,7 +28,7 @@ env = DefaultEnvironment()
 platform = env.PioPlatform()
 board = env.BoardConfig()
 
-FRAMEWORK_DIR = platform.get_package_dir("framework-mbed")
+FRAMEWORK_DIR = platform.get_package_dir("mbed")
 assert os.path.isdir(FRAMEWORK_DIR)
 
 # Be sure that the packages and tool as paths are in the search path

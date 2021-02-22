@@ -4,6 +4,6 @@
 
 ### [简介](https://github.com/OS-Q/mbed/wiki)
 
-[ mbed](https://github.com/OS-Q/mbed)
+[mbed](https://github.com/OS-Q/mbed)
 
 ### [Q = (OpenSource & OperatingSystem) ](http://www.OS-Q.com)

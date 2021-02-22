@@ -1,16 +1,3 @@
-# Copyright 2019-present PlatformIO <contact@platformio.org>
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
 
 import subprocess
 import sys
@@ -25,8 +12,8 @@ MBED_REPOSITORY = "https://github.com/ARMmbed/mbed-os.git"
 MBED_VERSION = "latest"
 
 PIO_PACKAGES_ROOT = join(expanduser("~"), ".platformio", "packages")
-PIO_MBED_PACKAGE_ROOT = join(PIO_PACKAGES_ROOT, "framework-mbed")
-LATEST_MBED_PACKAGE_ROOT = join(PIO_PACKAGES_ROOT, "framework-mbed-latest")
+PIO_MBED_PACKAGE_ROOT = join(PIO_PACKAGES_ROOT, "mbed")
+LATEST_MBED_PACKAGE_ROOT = join(PIO_PACKAGES_ROOT, "mbed-latest")
 
 
 def exec_cmd(*args, **kwargs):
