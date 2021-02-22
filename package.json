@@ -1,7 +1,16 @@
 {
-    "name": "framework-N02",
-    "description": "arm mbed framework",
-    "system": "*",
-    "url": "https://github.com/OS-Q/N02",
-    "version": "6.51401.200402"
+  "name": "mbed",
+  "version": "6.60600.210128",
+  "description": "Arm Mbed OS is a platform operating system designed for the internet of things",
+  "keywords": [
+    "framework",
+    "os",
+    "arm",
+    "hal"
+  ],
+  "homepage": "http://mbed.org",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ARMmbed/mbed-os"
+  }
 }
