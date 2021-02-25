@@ -71,7 +71,7 @@
             "BLE_SecurityAndPrivacy"
       ],
       "features" : [],
-      "targets" : ["NRF52_DK", "DISCO_L475VG_IOT01A"],
+      "targets" : ["NRF52832_DK", "DISCO_L475VG_IOT01A"],
       "toolchains" : [],
       "exporters": [],
       "compile" : true,

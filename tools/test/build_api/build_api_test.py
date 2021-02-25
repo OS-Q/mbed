@@ -336,7 +336,7 @@ class BuildApiTests(unittest.TestCase):
         """
         Test that merge region fails as expected when part size overflows region size.
         """
-        cfg = Config('NRF52_DK')
+        cfg = Config('NRF52832_DK')
         mock_exists.return_value = True
         mock_isabs.return_value = True
         max = 0x960
@@ -382,7 +382,7 @@ class BuildApiTests(unittest.TestCase):
         :param mock_isabs: mock the isabs call
         :return:
         """
-        cfg = Config('NRF52_DK')
+        cfg = Config('NRF52832_DK')
         mock_exists.return_value = True
         mock_isabs.return_value = True
 

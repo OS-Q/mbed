@@ -33,7 +33,7 @@ Next, add optional target specific configuration in `mbed-os/targets/TARGET_NORD
 }
 ```
 
-The optional configuration includes specifying errata fixes specific for the MCU release used on the target, configuring the low-frequency clock source, and configuring the UART behavior. See targets `NRF52_DK` and `NRF52840_DK` for examples.
+The optional configuration includes specifying errata fixes specific for the MCU release used on the target, configuring the low-frequency clock source, and configuring the UART behavior. See targets `NRF52832_DK` and `NRF52840_DK` for examples.
 
 ### LF Clock Configuration
 
@@ -202,20 +202,20 @@ The OTA and MBR binaries are obtained from the original FULL SoftDevice by split
 
 ### Changing SoftDevice
 
-By default, all applications are built with the FULL SoftDevice. This can be changed by modifying the application's `mbed_app.json` configuration file. Examples for the NRF52_DK and NRF52840_DK boards are shown below.
+By default, all applications are built with the FULL SoftDevice. This can be changed by modifying the application's `mbed_app.json` configuration file. Examples for the NRF52832_DK and NRF52840_DK boards are shown below.
 
 Build application with no MBR or SoftDevice:
 
 ```
     "target_overrides": {
-        "NRF52_DK": {
+        "NRF52832_DK": {
             "target.extra_labels_remove": ["SOFTDEVICE_COMMON", "SOFTDEVICE_S132_FULL"],
             "target.extra_labels_add": ["SOFTDEVICE_NONE"]
         },
         "NRF52840_DK": {
             "target.extra_labels_remove": ["SOFTDEVICE_COMMON", "SOFTDEVICE_S140_FULL"],
             "target.extra_labels_add": ["SOFTDEVICE_NONE"]
-        }       
+        }
     }
 ```
 
@@ -224,21 +224,21 @@ Build application with MBR only:
 
 ```
     "target_overrides": {
-        "NRF52_DK": {
+        "NRF52832_DK": {
             "target.extra_labels_remove": ["SOFTDEVICE_COMMON", "SOFTDEVICE_S132_FULL"],
             "target.extra_labels_add": ["SOFTDEVICE_S132_MBR"]
         },
         "NRF52840_DK": {
             "target.extra_labels_remove": ["SOFTDEVICE_S140_FULL"],
             "target.extra_labels_add": ["SOFTDEVICE_S140_MBR"]
-        }              
+        }
     }
 ```
 
-## NRF52840 CryptoCell310 Support 
+## NRF52840 CryptoCell310 Support
 
 By default, all NRF52840 applications will use the CryptoCell310 subsystem which is built into the NRF52840.  This provides hardware support for random number generation and encryption which are utilized by Mbed TLS.  If using the CryptoCell310 subsystem is not desired, it can be replaced with a software implementation.  This can be done by modifying the application's `mbed_app.json` configuration file as shown below.
- 
+
 ```
     "target_overrides": {
         "NRF52840_DK": {

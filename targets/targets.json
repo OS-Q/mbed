@@ -5445,7 +5445,7 @@
         "program_cycle_s": 6,
         "bootloader_supported": true
     },
-    "NRF52_DK": {
+    "NRF52832_DK": {
         "supported_form_factors": [
             "ARDUINO"
         ],
